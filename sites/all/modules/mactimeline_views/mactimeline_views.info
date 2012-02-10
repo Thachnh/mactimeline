@@ -1,0 +1,6 @@
+name = "Mactimeline views fields"
+description = "Vieds Fields for the Mactimeline project"
+package = "Mactimeline project"
+core = 6.x
+version = "6.x-1.0"
+

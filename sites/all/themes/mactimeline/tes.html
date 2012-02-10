@@ -1,0 +1,68 @@
+   <html>
+   <head>
+     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6/jquery.min.js"></script>
+   <script type="text/javascript" src="jquery.sortElements.js"></script>
+   <script type="text/javascript">
+    	$(function() {
+
+    	  $(window).load(function(){
+    		    var table = $('table.testtable');
+    		    
+    		    var thIndex = 2,
+    		                 inverse = false;
+    		             
+    		             $('#facility_header').click(function(){
+    		                 
+    		                 table.find('td').filter(function(){
+    		                     
+    		                     return $(this).index() === thIndex;
+    		                     
+    		                 }).sortElements(function(a, b){
+    		                     
+    		                     return $.text([a]) > $.text([b]) ?
+    		                         inverse ? -1 : 1
+    		                         : inverse ? 1 : -1;
+    		                     
+    		                 }, function(){
+    		                     
+    		                     // parentNode is the element we want to move
+    		                     return this.parentNode; 
+    		                     
+    		                 });
+    		                 
+    		                 inverse = !inverse;
+    		                     
+    		             });
+    		     	    
+    	  });
+
+    	});
+    </script>
+  </head>
+  <body>  
+  
+  <table class="testtable">
+
+    <tr>
+        <td>CCC</td>
+        <td>00001111</td>
+        <td>Amsterdam</td>
+        <td>GGG</td>
+    </tr>
+    <tr>
+        <td>JJJ</td>
+        <td>55544444</td>
+        <td>London</td>
+        <td>MMM</td>
+    </tr>
+    <tr>
+        <td>AAA</td>
+        <td>33332222</td>
+        <td>Paris</td>
+        <td>RRR</td>
+    </tr>
+</table>
+<a href="javascript:" id="facility_header">Test</a>
+    
+   </body>
+  </html>

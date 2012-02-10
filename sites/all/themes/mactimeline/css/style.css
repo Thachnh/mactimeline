@@ -1,0 +1,614 @@
+table{border-collapse:collapse;}
+*{font-family:Helvetica,Tahoma; font-size:13px}
+BODY{margin:0; padding:0; background:url('../images/bg.png') 0 -30px repeat-x}
+BODY, HTML{height:100%}
+IMG{border:0}
+A:link, A:visited{text-decoration:none}
+A:hover{color: #616D7E;}
+A{color:#000;}
+P{margin:0 0 15px 0}
+.nondisplay {display:none}
+.halfwidth {width:50%}
+.fullwidth {width:100%}
+A.active {color:red !important;}
+
+#layout{width:980px; height:100%; margin:auto;}
+#header{height:80px}
+	#header IMG{margin-top:23px}
+#main{width:830px; padding-bottom:15px; float:left; overflow:hidden}
+#right-side{width:120px; padding-bottom:15px; float:right; overflow:hidden}
+#footer{margin:-60px 0 0 0; background-color:#000; color:#ccc; padding:10px; padding-left:5px; clear:both; line-height:15px; font-size:11px;}
+	#footer .indent{width:960px; margin:auto;}
+	#footer *{color:#ccc; font-size:11px}
+
+.primary-links {padding:0; margin:8px 0 30px 0; }
+	.primary-links *{color:black; text-transform:uppercase; display:inline;}
+	.primary-links .active, .primary-links .active A{color:red !important;}
+
+#right-side .menu{list-style:none; margin:0 0 15px 0; padding:0;}
+	#right-side .menu A	{font-size:11px; color:#333;}
+	#right-side .menu LI{background-color:#F1F1F2; padding:2px 5px 2px 5px; margin-bottom:2px;} 
+
+.view-category H3, H2, .block-header{
+	padding:2px 0 1px 0px; margin:0 0 4px 0; display:block; color: #999; font-size: 14px; font-weight: normal;
+	}
+.block-header{
+	border-bottom: 1px solid #999;
+	}
+.view-category H3 a, H2 a, .block-header a {
+	color: #999; font-size: 14px;
+	border-bottom: 1px solid #999; 
+}
+
+	H2 SPAN{font-weight:normal !important; padding-left:10px; font-size:90%;}
+.views-table{margin:0 0 15px 0; padding:0; width:100%; border:none; border-spacing:2px}
+	.views-table *{font-size:11px;}
+	.views-table TH{height:0; padding:0;}
+	.views-table TR{border-bottom: 1px solid #D8D8D8; margin-bottom: 3px;}
+	.views-table TD{padding:2px 5px 2px 5px; margin:0; vertical-align:top;}
+	.views-table .odd{/*background:#f1f1f2*/}
+	.views-table .links{margin:0; padding:0}
+	.views-field-field-event-date-value, .views-field-field-date-value{width:70px; text-transform: uppercase; text-align:right; font-size: 11px; color: #4B4B4B;}
+	.views-field-comments-link{width:95px;}
+	.views-field-field-vote-up-down-value {width: 160px; padding-right: 0!important;}
+	.views-field-field-days-since-last-update-value{width:18px}
+	.views-field-field-event-products-value{width:90px; min-width:18px;}
+	.views-field-field-days-since-last-update-value{text-align:center; font-style:italic;}	
+	.view-events .views-field-nothing, .views-field-field-related-product-nid{/*width:90px;*/}
+	.view-events .views-field-nothing{text-align:center;}
+	.view-events .views-field-nothing, .views-table .views-field-mtl-title-description {vertical-align: top; text-align: left;}
+	.view-events .views-field-nothing span, .views-table .list-right strong {padding: 0; margin: 0; font-weight: bold; font-size: 13px; color: black;}
+
+.views-view-grid{margin-bottom:15px;}
+	.views-view-grid TD{padding:0 9px 10px 9px}
+	.views-view-grid .col-1{padding-left:0}
+	.views-view-grid .col-8{padding-right:0}
+.view-category .views-field-title, .view-group-products .views-field-title, .view-taxonomy-term .views-field-title{border-top:solid #999999 1px; font-size:13px; color:#333; text-align:center}
+	.view-category .views-field-title A, .view-group-products .views-field-title A, .view-taxonomy-term .views-field-title A{font-size:13px; color:#333;}
+	.view-category TD, .view-group-products TD{width:85px; vertical-align:top;}
+	.view-category .views-field-field-icon-fid, .view-group-products .views-field-field-icon-fid, .view-taxonomy-term .views-field-field-icon-fid{width:85px; height: 85px; display:table-cell; vertical-align:middle; text-align:center; overflow:hidden;}
+
+.views-admin-links{width:auto !important; background-color:black !important; border:solid #999 1px; padding:6px !important; border-radius:6px 6px; -moz-border-radius:6px}
+	.views-admin-links *{padding:0; margin:0; font-size:11px; color:white !important}
+
+/*Other*/
+UL.links LI{display:inline}
+.clear{clear:both; height: 3px;}
+.red{color:red}
+.grey-up{color:#999; font-weight: bold;}
+.left{float:left}
+.right{float:right}
+.vote_up_down_percent_up{width:30px; font-weight: normal; }
+.vote_up_down_percent_down{width:30px; font-weight: normal; }
+.vote_up_down_down_count{width:25px; font-weight: normal; }
+.vote_up_down_up_count{width:25px; font-weight: normal; }
+
+
+.form-required{color:red;}
+.view-empty{margin-left:10px;}
+.admin-controls{margin:0; padding:0; list-style-type:none; text-align:right;}
+	.admin-controls A{color:white}
+	.admin-controls LI{margin-left:10px; display:block; float:right; text-transform:uppercase; padding:2px 5px 2px 5px}
+		.admin-controls LI.edit{background-color:green;}
+		.admin-controls LI.delete{; background-color:red;}
+
+/*Product page*/
+	.product .header{margin-bottom:10px; border-collapse:collapse; border-spacing:2px;}
+	.product table.header td {vertical-align:middle;}
+		.product .icon{width:85px; height:85px; padding:0; text-align:center; vertical-align:middle;}
+		.product .related-group{width: 100%;}
+		.product .related-group A{font-size:20px; clear:both; color:#999}	
+		.product .header .links {width: 200px;padding-top: 15px;}	
+		.product .header .links a{float: right; margin: 4px 0;}
+	.product H1{margin:8px 0 0 5px; font-size:48px; font-family: myriad_pro;}	
+	.product .apple-links{clear:left; margin-bottom:10px;}
+	 .product .apple-links A{color:black; text-transform:uppercase;}
+	 .product .product-dates span {padding-right: 20px;}
+
+	.content-multigroup-display-table-multiple-columns{margin:0 0 15px 0; border-spacing:2px;}
+		.content-multigroup-display-table-multiple-columns TH{padding:2px 0 2px 0; text-align:center !important; font-weight: normal; font-size: 14px; color: #999; text-decoration:underline;}
+			.content-multigroup-display-table-multiple-columns TH A{color: #999; text-decoration:underline;font-size:14px;}
+			.content-multigroup-display-table-multiple-columns TH A:hover{text-decoration:none;}
+		.content-multigroup-display-table-multiple-columns *{font-size:11px; color:#333}
+		.content-multigroup-display-table-multiple-columns TD{padding:2px 5px 2px 5px; margin:0;}
+		.content-multigroup-display-table-multiple-columns TR{border-bottom: 1px solid #D8D8D8;}
+		.content-multigroup-display-table-multiple-columns TR.even{background:#f1f1f2}
+		.content-multigroup-display-table-multiple-columns .links{margin:0; padding:0}
+		.content-multigroup-display-table-multiple-columns .field-type-number-float{text-align:center;}
+		.content-multigroup-display-table-multiple-columns .field-type-money{width:80px;}
+		.content-multigroup-display-table-multiple-columns .field-field-model{width:264px;}
+			.content-multigroup-display-table-multiple-columns .field-type-money .field-item{padding-right:20px; text-align:right;}
+				
+	.view-group-products{}
+		.view-group-products TABLE{margin:0;}	
+		.view-group-products .imagecache-icon{margin:0 !important; float:none;}
+
+/*RSS feed*/
+.feed-icon{float:right; margin:10px 10px 0 0; color:#000; font-size:14px;}
+	.feed-icon:hover{text-decoration:none;}
+	.feed-icon IMG{margin:0 0 -2px 2px}
+
+/*Update page*/
+	.update .header{margin-bottom:15px; border-collapse:collapse; border-spacing:0;}
+		.update .icon{width:85px; height:85px; padding:0; text-align:center; vertical-align:middle;}
+		.update .related-group{vertical-align:middle; float:left; padding-left: 20px;}
+		.update .related-group A{font-size:20px; font-family: myriad_pro; clear:both; color:#999}	
+		.update .date {color: #454545;}
+		.update .information {color: #454545; line-height: 20px;}	
+		.update .information label {width: 110px;}
+	.update H1{margin:0; font-size:48px;}
+		.update H1 A{font-size:48px !important; text-decoration:none; color:#000 !important;}
+	.update .info, .update .rating{margin:10px 0 30px 0}
+	.update .title{margin-bottom:15px}
+	.update .black-up{margin-bottom:5px; text-transform:uppercase; color:#000; font-weight: normal;}	
+
+/*esem Feature Request page*/
+	.feature .header{margin-bottom:15px; border-collapse:collapse; border-spacing:0;}
+		.feature .icon{width:85px; height:85px; padding:0; text-align:center; vertical-align:middle;}
+		.feature .related-group{vertical-align:middle;}
+		.feature .related-group A{font-size:20px; clear:both; color:#999}
+	.feature H1{margin:0; font-size:48px;}
+		.feature H1 A{font-size:48px !important; text-decoration:none; color:#000 !important;}
+	feature .related-group{float:left}
+		.feature .related-group A{font-size:20px; clear:both; color:#999}
+	.feature .info, .update .rating{margin:10px 0 30px 0}
+	.feature .title{margin-bottom:15px}
+	.feature .black-up{margin-bottom:5px; text-transform:uppercase; color:#000; font-weight: normal;}
+/*end esem*/
+
+/*Event page*/
+	.event H1{margin:0; font-size:42px;font-family: myriad_pro;}
+		.event H2.clear{margin-bottom:5px;}
+		.event .date {font-size: 13px; color: #454545; margin-top: -10px; margin-bottom: 20px;}
+		.event .announcement .header a{font-size: 13px;font-weight: bold;}
+	A.event{background-color:#dcdddf; border:solid #AAA 1px; padding:0 3px 0 3px; color:#000;}
+
+/**Comments (esem: commented in favor of following style)
+* #comments H2.comments{margin-bottom:20px}
+* .comment{margin-bottom:15px}
+* 	.comment .author{margin-bottom:5px}
+* #comment-form{margin:0; padding-top:20px; display:block}
+* 	#comment-form FIELDSET{margin:0 0 10px 0; border:none; padding:0;}
+* 		#comment-form FIELDSET LEGEND{display:none;}
+* 		#comment-form FIELDSET LABEL{width:100px;}
+* 		#comment-form FIELDSET .form-radios{float:left; margin-bottom:10px;}
+* 			#comment-form FIELDSET .form-radios LABEL{width:150px;}
+* 	#comment-form .resizable-textarea{float:left;}
+* 	#comment-form #edit-comment{width:722px; height:160px; max-width:722px; margin-bottom:10px}
+* 	#comment-form .form-submit{clear:both; float:right}
+*/
+
+/*Comments (esem: to make comment area be on right half)*/
+#comments H2.comments{margin-bottom:20px}
+.comment{margin-bottom:10px; padding-bottom:5px; clear:left; float:left; width: 50%; border-bottom: 1px solid #999;}
+	.comment .author{margin-bottom:5px}
+	.comment .content p{margin-bottom: 10px;}
+	.comment .time {color: #454545;}
+#comment-form{margin:0; padding-top:0px; padding-left:15px; display:inline; position:absolute;}
+	#comment-form FIELDSET{margin:0 0 10px 0; border:none; padding:0;}
+		#comment-form FIELDSET LEGEND{display:none;}
+		#comment-form FIELDSET LABEL{width:100px;}
+		#comment-form FIELDSET .form-radios{float:left; margin-bottom:10px;}
+			#comment-form FIELDSET .form-radios LABEL{width:150px;}
+	#comment-form .resizable-textarea{float:left; clear: both;}
+	#comment-form #edit-comment{width:380px; height:160px; max-width:380px; margin-bottom:10px;}
+	#comment-form .form-submit{clear:both; float:right}
+/*end esem*/
+
+/*Login*/
+#user-login{width:400px;}
+	#user-login .form-text{width:250px; float:right; margin-bottom:5px;}
+	#user-login .form-submit{clear:both; float:right;}
+
+/*Forms*/
+TEXTAREA.error, INPUT.error{border-color:red;}
+LABEL{width:90px; display:block; float:left; color:#454545; margin-right:10px}
+.form-item{margin-bottom:5px; clear:both;}
+.form-text, .form-textarea{background-color:#E7E8EB; border:solid #57575a 1px; padding:3px;}
+
+/*Calendar Page*/
+#calendar{width:100%; margin:10px 0; padding:0; border-spacing:0px;}
+	#calendar TD{width:100px; height:65px; padding:2px; text-align:left; vertical-align:top;
+					border-right:solid #ccc 1px; border-left:solid #ccc 1px; border-bottom:solid #d8d8d8 1px; border-top:solid #d8d8d8 2px;}
+		#calendar TD *{vertical-align:middle;}
+		#calendar TD DIV.date{margin-bottom:3px; font-weight:bold; color:#999999; text-transform:uppercase}
+		#calendar TD A{font-size:11px; margin:3px;}
+		/*#calendar TD.event-cell{background-color:yellow !important;}*/
+	#calendar TR.odd TD{background-color:#dcdddf;}
+	.calendar-header TD{height:auto !important; padding:2px 0 2px 10px; text-align:center !important; font-weight:bold; color: #999}
+#calendar-menu{list-style:none; margin:0 0 0 20px; padding:0;}
+	#calendar-menu LI{margin-bottom:5px;}
+	#calendar-menu LI A.active{color:red;}
+	#calendar .date-week-day-sat{background-color:#e2e2e2;}
+	#calendar .date-week-day-sun{background-color:#e2e2e2;}
+	#calendar .date-month-day-1{border-left:solid #000 2px;}
+	#calendar .date-today{background-color:#FFFF99;}
+	#calendar .date-blank{}
+
+
+/*Update Graphic*/
+#update-graphic {width:410px; padding:0; margin:10px 0; list-style:none;}
+	#update-graphic LI{height:15px; margin-bottom:8px; clear:both;}
+	#update-graphic .ug-date{width:60px; text-transform: uppercase; height:15px; padding:2px 5px 2px 0; text-align:right; float:left; font-size:11px}
+	#update-graphic .ug-date-between{width: 30px; float:left; padding-right: 5px; text-align:right; font-style: italic;}
+	#update-graphic .ug-bar{margin-top:2px; height:15px; background-color:#0088cc}
+	#update-graphic .greenchart{background-color: #33CC00}
+	#update-graphic .redchart{background-color: #990000}
+	#update-graphic .ug-bar-width{width:310px; float:left}
+#ug-average{width:310px; margin-left:100px; position:absolute;}
+	#ug-average DIV{border-right:solid red 4px}
+#ug-scale{margin-left:100px; width:310px; border-left:solid #444 1px; position:absolute;}
+	#ug-scale UL{padding:0; margin:0; list-style:none;}
+	#ug-scale LI{display:block; float:left; width:17.67px; padding:0px 2px 0 0; text-align:right; font-size:10px; border-right: 1px solid #999;}
+	
+/*Filters*/
+#mactimeline-calendar-year-selection{float:right; height:20px; overflow:hidden;}
+	#mactimeline-calendar-year-selection *{margin:0; vertical-align:top;}
+	#mactimeline-calendar-year-selection LABEL{width:auto; padding:4px 0 0 0; margin-left:5px; color:#fff;}
+	#mactimeline-calendar-year-selection #edit-year-wrapper{float:left;} 
+	#mactimeline-calendar-year-selection #edit-year{margin-left:5px; vertical-align:middle;}
+	#mactimeline-calendar-year-selection #edit-submit{margin:0 1px 0 -2px; padding:4px 5px 0 5px; font-size:12px; display:inline; border:none; background:none; color:white; font-weight:bold; cursor:pointer; text-transform:uppercase;}
+	
+#views-exposed-form-updates-page-1{float:right; height:20px; overflow:hidden;}
+	#views-exposed-form-updates-page-1 *{float:left; margin:0; vertical-align:top;}
+	#views-exposed-form-updates-page-1 LABEL{width:auto; padding:4px 0 0 0; margin-left:5px; color:#fff;}
+	#views-exposed-form-updates-page-1 OPTION{display:block;}
+	#views-exposed-form-updates-page-1 #edit-date-value-year, #views-exposed-form-updates-page-1 #edit-date-value-month, #views-exposed-form-updates-page-1 #edit-type{margin-left:5px; vertical-align:middle;}
+	#views-exposed-form-updates-page-1 #edit-submit-updates{margin:0 1px 0 -2px; padding:4px 5px 0 5px; font-size:12px; display:inline; border:none; background:none; color:white; font-weight:bold; cursor:pointer; text-transform:uppercase;}
+		
+#reservation .form-text {
+    background-color: #FFFFFF;
+    border: 1px solid #FF9907;
+    color: #832C1D;
+    font-family: Arial,Helvetica,sans-serif;
+    font-size: 11px;
+    margin: 0 0 3px 4px;
+    padding: 1px 2px;
+}
+#reservation .form-item label {
+    float: left;
+    font-family: Verdana,Arial,Helvetica,sans-serif;
+    font-size: 11px;
+    line-height: 16px;
+    padding: 0 0 4px;
+    text-align: right;
+    text-decoration: none;
+    vertical-align: top;
+    width: 153px;
+}
+.submit_btn a {
+    background: url("images/submit_btn.png") repeat scroll 0 0 transparent;
+    height: 37px;
+    width: 73px;
+}
+
+div.error, tr.error {
+    background-color: #FFCCCC;
+    color: #A30000;
+}
+div.error, tr.error {
+    background: none repeat scroll 0 0 #FFCCCC;
+    color: #220000;
+    padding: 2px;
+}
+
+div.error {
+    border: 1px solid #DD7777;
+}
+th a{
+color:#fff;
+}
+/*esem: user login block in header*/
+#block-user-0 {
+  margin: 5px 0 25px;
+}
+#block-user-0 *
+{
+  display: inline;
+}
+#edit-user-login-block {
+  display:none; /* rehide hidden form element */
+}
+#block-user-0 h2 {
+  font-size: 92%; /* match .content font size */
+}
+#block-user-0 .form-item .form-text {
+  padding: 0;
+}
+#block-user-0 .item-list ul {
+  padding: 0;
+}
+#block-block-2 {
+  margin: 7px 0 30px;
+}
+#user-login-form #edit-submit {
+  border: 0px;
+  background: transparent;
+  text-decoration: none;
+  cursor: pointer;
+  padding: 1px;
+}
+#user-login-form #edit-submit:hover {
+  text-decoration: underline;
+}
+#name-hint , #pass-hint {
+color: #736F6E; /*make sure color is grey (IE was not getting grey)*/
+}
+/*end esem*/
+/*esem: user registration&forgot-pass pages*/
+#user-register .form-item label {
+  float: none;
+  width: 100%;
+  margin-top: 10px;
+}
+#user-register .description {
+  font-size: 11px;
+  width: 380px;
+}
+#user-pass .form-item label {
+  float: none;
+  width: 100%;
+  margin-top: 10px;
+}
+/*end esem*/
+/*esem: user profile page*/
+#user-profile-form .form-item label {
+  float: none;
+  width: 100%;
+  margin-top: 10px;
+}
+#user-profile-form .description {
+  font-size: 11px;
+  width: 380px;
+}
+#edit-mail-wrapper {
+  width: 400px;
+}
+#edit-pass-wrapper .form-item label {
+  float: none;
+  width: 100%;
+  margin-top: 10px;
+}
+#edit-pass-pass1-wrapper {
+  display: block;
+  float: left;
+  clear: none;
+  width: 200px;
+}
+#edit-pass-pass1-wrapper .password-strength {
+  display: block;
+}
+#edit-pass-pass2-wrapper {
+  display: inline;
+  float: left;
+  clear: none;
+  width: 200px;
+}
+#edit-pass-pass2-wrapper .password-confirm {
+  display: block;
+}
+/*end esem*/
+/*esem change Event-Title font size, outputed by views at /events */
+.font_13px {
+  font-size: 13px!important;
+}
+.font_13px a {
+  font-size: 13px!important;
+}
+/*end esem*/
+/*esem styling text fields and labels for them*/
+#edit-title-wrapper label {
+  float: none;
+  width: 100%;
+  margin-top: 10px;
+}
+#edit-title-wrapper #edit-title {
+  width: 380px;
+}
+#edit-field-feature-description-0-value-wrapper label {
+  float: none;
+  width: 100%;
+  margin-top: 10px;
+}
+#edit-field-feature-description-0-value-wrapper .description {
+  font-size: 11px;
+  width: 380px;
+}
+#edit-field-feature-description-0-value-wrapper textarea {
+  width: 380px;
+}
+#edit-field-related-group-nid-nid-wrapper label {
+  float: none;
+  width: 100%;
+  margin-top: 10px;
+}
+/*end esem*/
+/*esem styling Feature Request node*/
+.field-field-feature-description div.field-item {
+  margin-top: 15px;
+  margin-left: 0px;
+  margin-bottom: 20px;
+}
+/*end esem*/
+
+/* TAGS */
+
+.tags , .view-content .list-right .event-type {
+	margin: 3px 0;
+}
+
+.tags .Intr {
+	color: white;
+	background-color: #4D3380;
+	border: 1px solid #2E1F4D;
+	padding: 0 2px;
+}
+
+.tags .Mjr {
+	color: white;
+	background-color: #003F80;
+	border: 1px solid #00254D;
+	padding: 0 2px;
+} 
+
+.tags .Scd {
+	color: white;
+	background-color: #487DB3;
+	border: 1px solid #1F5B99;
+	padding: 0 2px;
+}
+
+.tags .Mnr {
+	color: white;
+	background-color: #ccc;
+	border: 1px solid #aaa;
+	padding: 0 2px;
+}
+
+.tags .new-tag {
+	color: white;
+	background-color: #ff0000;
+	border: 1px solid #cc0000;
+	padding: 0 2px;
+}
+
+.tags .link-button {
+	border: 1px solid #CCCCCC;
+	background-color: #d8d8d8;
+	color: #757575;
+	padding: 0 2px;
+}
+.tags .link-button a {
+	color: #757575;
+}
+
+.view-content .list-right .event-type a {
+	color: #161616;
+	background-color: #d4d4d4;
+	border: 1px solid #969696;
+	padding: 0 2px;
+	font-weight: normal;
+}
+
+.view-content .list-right .comment-tag a {
+	color: #757575;
+	background-color: #d8d8d8;
+	border: 1px solid #ccc;
+	padding: 0 2px;
+}
+.view-content .list-right .comment-tag.more a {
+	color: white;
+	background-color: #646464;
+	border: 1px solid #323232;
+	padding: 0 2px;
+}
+
+/* YEAR SELECTION ORDERED LIST */
+
+#mactimeline-calendar-year-list {
+	padding: 3px 0;
+	margin: 5px 0;
+	border-bottom: 1px solid #969696;
+}
+
+#mactimeline-calendar-year-list li a, .footer-nav, .footer-nav a, .pager li, .pager a {
+	color: #969696;
+	font-size: 14px!important;
+}
+#mactimeline-calendar-year-list li a:hover {
+	color: red;
+}
+#mactimeline-calendar-year-list li.active a {
+	color: red;
+}
+
+#mactimeline-calendar-year-list li {
+	display: inline;
+	padding: 0 5px;
+	border-left: 1px solid #969696;
+}
+
+#mactimeline-calendar-year-list li:first-child {
+	border-left: 0px;
+	padding-left: 0;
+}
+
+.list-right .description {padding-bottom: 3px;}
+.list-right strong a {font-size: 13px;}
+
+/* PAGERS */
+.pager li {
+	display:inline;
+}
+.pager li.pager-current, .pager li.pager-item, .pager li.pager-next {
+	border-left: 1px solid #969696;
+	padding-left: 4px;
+}
+.pager {
+	padding: 0;
+}
+
+/* VOTE GRAPH */
+.vote-graph {
+	width: 100px;
+}
+.vote-graph .graph-bar {
+	height: 14px;
+	background-color: #CCC;
+	float: left;
+	margin-left: 3px;
+}
+.vote-graph .graph-up, .vote-graph .graph-down {
+	background-color: #969696;
+	border: 1px solid #969696;
+	height: 12px;
+	margin-bottom: 2px;
+}
+
+/* PRODUCT LIST */
+@font-face {
+	font-family: myriad_pro;
+	src: url('../myriadpro-semibold.ttf');
+}
+.big-title, .big-title a {
+	font-size: 16px;
+	font-family: myriad_pro;
+	font-weight: bold;
+}
+.product-list {
+	line-height: 17px;
+	color: #4B4B4B;
+	padding-top: 10px;
+}
+.product-list .product-info {
+	clear: both;
+	width: 150px;
+}
+.product-list .tags {
+	clear: both;
+	padding-top: 3px;
+}
+
+/* OVERRIDE THE THEME OF TAB IN PRODUCT PAGE */
+#tabs {border: 0px;}
+#tabs .tab-header {border: 0; background: none; padding: 10px 0;}
+#tabs .tab-header li {border: 0; background: none; border-radius: 0;}
+#tabs .tab-header li:first-child {border-right: 1px solid #999;}
+#tabs .tab-header li:first-child a {padding-left: 0;}
+#tabs .tab-header li a {color: #999; font-size: 14px; padding: 0 5px;}
+#tabs .tab-header li.ui-tabs-selected a {color: red;}
+#tabs .ui-tabs-panel {padding: 0;}
+
+/* IDEA PAGE*/
+.idea .description {font-size: 14px; padding: 10px 0;}
+.idea .information {color: #454545;}
+.submitidea {color: #454545;}
+
+/* BIG COUNT DOWN IN EVENT PAGE*/
+table.countdown {border-collapse:separate; border-spacing:15px 3px;}
+table.countdown .number td{width: 85px; height: 85px; background-color: #999; font-family: myriad_pro; color: white; font-size: 50px; text-align: center; vertical-align: bottom;}
+table.countdown .label td{text-transform: uppercase; font-size: 13px; text-align: center; border-top: 1px solid #999;}
+.red table.countdown .number td{background-color: #CC0000;}
+.red table.countdown .label td{color: black;}
+
+.social-button {margin-top: 10px;}

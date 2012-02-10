@@ -1,0 +1,6 @@
+name = "Mactimeline hooks"
+description = "Hooks for the Mactimeline project"
+package = "Mactimeline project"
+core = 6.x
+version = "6.x-1.0"
+

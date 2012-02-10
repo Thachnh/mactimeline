@@ -1,0 +1,12 @@
+name = Dynamic Field
+description = Computes user generated php and lets you to access Drupal objects.
+dependencies[] = content
+package = CCK
+core = 6.x
+version = "6.0034"
+; Information added by drupal.org packaging script on 2009-02-10
+version = "6.x-1.0"
+core = "6.x"
+project = "dynamicfield"
+datestamp = "1234262112"
+

@@ -1,0 +1,159 @@
+# $Id: countdowntimer.de.po,v 1.1.2.1 2008/11/07 18:22:34 jvandervort Exp $
+#
+# German translation of Drupal (general)
+# Copyright YEAR NAME <EMAIL@ADDRESS>
+# Generated from files:
+#  countdowntimer.module,v 1.8.2.22.2.4.2.21 2008/10/08 16:04:57 jvandervort
+#  countdowntimer.info,v 1.2.2.7.2.1 2007/09/18 18:49:50 jvandervort
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Drupal Javascript countdown timer V6.x-2.19\n"
+"POT-Creation-Date: 2008-11-07 19:01+0100\n"
+"PO-Revision-Date: 2008-11-07 19:08+0100\n"
+"Last-Translator: Frank Tartler <frank.tartler@googlemail.com>\n"
+"Language-Team: Frank Tartler <frank.tartler@googlemail.com>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
+"X-Poedit-Language: German\n"
+"X-Poedit-Country: GERMANY\n"
+"X-Poedit-SourceCharset: utf-8\n"
+
+#: countdowntimer.module:29
+msgid "A module which creates javascript countdown timers."
+msgstr "Ein Modul das Javascript-Countdown-Timer erstellt."
+
+#: countdowntimer.module:116
+msgid "Javascript"
+msgstr ""
+
+#: countdowntimer.module:121
+msgid "Javascript load options"
+msgstr ""
+
+#: countdowntimer.module:123
+msgid "Nodes only"
+msgstr "Nur Beiträge"
+
+#: countdowntimer.module:123
+msgid "Every page"
+msgstr "Jede Seite"
+
+#: countdowntimer.module:123;128
+msgid "Page list"
+msgstr "Seitenliste"
+
+#: countdowntimer.module:124
+msgid "Node view will only load when a single node is viewed.  Every page, is well, EVERY PAGE.  Page list will use the list below."
+msgstr ""
+
+#: countdowntimer.module:130
+msgid "Enter one page per line as Drupal paths. The '*' character is a wildcard. Example paths are %blog for the blog page and %blog-wildcard for every personal blog. %front is the front page."
+msgstr "Eine Seite pro Zeile als Drupal-Pfade eingeben. Das Zeichen ‚*‘ ist ein Platzhalter. Beispielpfade sind %blog für die Weblog-Seite und %blog-wildcard für alle persönlichen Weblogs. %front ist die Startseite."
+
+#: countdowntimer.module:136
+msgid "Output Overrides"
+msgstr "Ausgabe-Ersetzungen"
+
+#: countdowntimer.module:138
+msgid "Output formats change the display of the timer.  The global format is used unless you choose a preset in the timer tags.  You can hard-code the output format in the timer tags as well.  Available replacement values are: %day%, %month%, %year%, %dow%, %moy%, %years%, %ydays%, %days%, %hours%, %mins%, and %secs%."
+msgstr "Ausgabeformate ändern die Anzeige des Timers. Das globale Format wird verwendet, solange keine Voreinstellung in den Timer-Tags verwendet wird. Das Ausgabeformat kann genauso auch fest in den Timer-Tags angegeben werden. Verfügbare Ersetzungswerte sind: %day%, %month%, %year%, %dow%, %moy%, %years%, %ydays%, %days%, %hours%, %mins% und %secs%."
+
+#: countdowntimer.module:144
+msgid "Global output format"
+msgstr "Globales Ausgabeformat"
+
+#: countdowntimer.module:146
+msgid "The global output format is the baseline unless you use the presets below."
+msgstr "Das globale Ausgabeformat ist die Basis, solange die Voreinstellungen unten nicht verwendet werden."
+
+#: countdowntimer.module:153
+msgid "Output format preset 1"
+msgstr "Ausgabeformat-Voreinstellung 1"
+
+#: countdowntimer.module:159
+msgid "Output format preset 2"
+msgstr "Ausgabeformat-Voreinstellung 2"
+
+#: countdowntimer.module:165
+msgid "Output format preset 3"
+msgstr "Ausgabeformat-Voreinstellung 3"
+
+#: countdowntimer.module:172
+msgid "Highlight settings"
+msgstr "Hervorhebungs-Einstellungen"
+
+#: countdowntimer.module:173
+msgid "When a timer is nearing completion, you can change its' color or use css formatting."
+msgstr "Wenn sich ein Timer seiner Ablaufzeit nähert kann dessen Farbe geändert oder CSS-Formatierung verwendet werden."
+
+#: countdowntimer.module:180
+msgid "Highlight tagging"
+msgstr ""
+
+#: countdowntimer.module:182
+msgid "Use style=\"color:red;background-color:white;\" or class=\"\" etc..."
+msgstr ""
+
+#: countdowntimer.module:187
+msgid "Highlight threshold (minutes)"
+msgstr "Hervorhebungs-Grenzwert (Minuten)"
+
+#: countdowntimer.module:189
+msgid "Number of minutes left before highlighting is applied."
+msgstr "Anzahl verbleibender Minuten bevor die Hervorhebung verwendet wird."
+
+#: countdowntimer.module:196
+msgid "Timer complete statement"
+msgstr "Aussage bei Ablauf des Timers"
+
+#: countdowntimer.module:198
+msgid "Statement that prints when a timer has completed."
+msgstr "Aussage die anzeigt wird, wenn der Timer abgelaufen ist."
+
+#: countdowntimer.module:203
+msgid "Clock type"
+msgstr "Uhrentyp"
+
+#: countdowntimer.module:205
+msgid "12 Hour"
+msgstr "12 Stunden"
+
+#: countdowntimer.module:205
+msgid "24 Hour"
+msgstr "24 Stunden"
+
+#: countdowntimer.module:206
+msgid "There aren't many clock settings right now, but I'll add them slowly over time."
+msgstr "Momentan gibt es nicht viele Uhr-Einstellungen, sie werden aber langsam ergänzt werden."
+
+#: countdowntimer.module:218
+msgid "Countdown Timer admin settings may not contain single quotes(')."
+msgstr "Countdown Timer Verwaltungseinstellungen dürfen keine einfachen Anführungszeichen (') enthalten."
+
+#: countdowntimer.module:258
+msgid "File Create Error: timer.js could not be created"
+msgstr "Fehler beim Erstellen einer Datei: timer.js konnte nicht erstellt werden"
+
+#: countdowntimer.module:55
+msgid "Countdown Timer"
+msgstr ""
+
+#: countdowntimer.module:56
+msgid "Configure the Countdown timer's display format"
+msgstr "Das Anzeigeformat des Countdown-Timers konfigurieren"
+
+#: countdowntimer.module:0
+msgid "countdowntimer"
+msgstr ""
+
+#: countdowntimer.info:0
+msgid "Countdown timer"
+msgstr ""
+
+#: countdowntimer.info:0
+msgid "Provides a timer that counts down/up to a certain date-time."
+msgstr "Stellt einen Timer bereit, der zu einem bestimmten Datum/Uhrzeit herunter oder heraufzählt."
+

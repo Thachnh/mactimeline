@@ -1,0 +1,19 @@
+<?php
+
+
+function mactimeline_views_views_api() {
+
+  if ($user->name == 'Admin') {
+    drupal_set_message('hi');
+  }
+
+  return array(
+    'api' => 2,
+    'path' => drupal_get_path('module', 'mactimeline_views') . '/views', 
+  );
+}
+
+
+
+
+

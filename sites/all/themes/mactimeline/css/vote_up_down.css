@@ -1,0 +1,100 @@
+/* $Id: vote_up_down.css,v 1.1 2009/10/25 11:50:29 webmaster Exp $  */
+
+.vote-up-down-widget SPAN{
+	float: right;
+}
+
+.vote-up-down-via {}
+
+.vote_up_down_percent_up{
+	
+}
+
+.vote-up-act, .vote-up-inact, .vote-down-act, .vote-down-inact, .up-inact, .down-inact {
+  display: block;
+  float: left;
+  text-decoration: none;
+  width: 14px;
+  height: 14px;
+}
+
+a.vote-up-inact, a.vote-down-inact, span.vote-up-inact, span.vote-down-inact {
+  cursor: pointer;
+}
+
+a.vote-up-act, a.vote-down-act, span.vote-up-act, span.vote-down-act {
+  cursor: default;
+}
+
+.vote-up-act, .vote-up-inact:hover {
+  background: url(../images/icons/vote_yes_over.png) no-repeat 0px 0px;
+}
+
+.vote-up-inact, .up-inact {
+  background: url(../images/icons/vote_yes.png) no-repeat 0px 0px;
+}
+
+.vote-down-act, .vote-down-inact:hover {
+  background: url(../images/icons/vote_no_over.png) no-repeat 0px 0px;
+}
+
+.vote-down-inact, .down-inact {
+  background: url(../images/icons/vote_no.png) no-repeat 0px 0px;
+}
+
+.vote-points {}
+
+.rating .vote-up-down-widget SPAN{
+	float:none;
+}
+
+.rating .vote-up-down-widget UL{
+	list-style:none;
+	margin:0;
+	padding:0;
+}
+
+.rating .vote-up-down-widget UL LI{
+	display:block;
+	width:100%;
+	float:left;
+	height: 85px;
+	margin-bottom: 10px;
+}
+
+.rating .vote-up-down-widget DIV SPAN{
+	color:black;
+}
+
+.rating .vote-up-act, .rating .vote-up-inact, .rating .vote-down-act, .rating .vote-down-inact, .rating .up-inact, .rating .down-inact {
+  display: block;
+  margin-right:5px;
+  float: left !important;
+  text-decoration: none;
+  width: 85px;
+  height: 85px;
+}
+
+.rating .vote-up-act, .rating .vote-up-inact:hover {
+  background: url(../images/icons/vote_yes_over-BIG.png) no-repeat 0px 0px;
+}
+
+.rating .vote-up-inact, .rating .up-inact {
+  background: url(../images/icons/vote_yes-BIG.png) no-repeat 0px 0px;
+}
+
+.rating .vote-down-act, .rating .vote-down-inact:hover {
+  background: url(../images/icons/vote_no_over-BIG.png) no-repeat 0px 0px;
+}
+
+.rating .vote-down-inact, .rating .down-inact {
+  background: url(../images/icons/vote_no-BIG.png) no-repeat 0px 0px;
+}
+
+.rating .vote-up-down-widget .vote_up_down_down_graph, .rating .vote-up-down-widget .vote_up_down_up_graph {
+	height: 28px;
+	background-color: #ccc;
+}
+
+.rating .vote-up-down-widget .grey-up{color:black; font-weight: normal; margin-left: 95px;height: 28px;font-size:14px!important;line-height: 28px;text-transform: none;}
+.rating .vote-up-down-widget .grey-up span {font-size:14px}

@@ -1,0 +1,158 @@
+<?php
+/*It's important for us to know is there any updates in the this project*/
+  $upd = db_query('SELECT DISTINCT ctu.* FROM content_type_update ctu WHERE ctu.field_related_product_nid = '.$node->nid.' && (ctu.field_update_type_value = 2 || ctu.field_update_type_value = 3) ORDER BY ctu.field_date_value DESC');
+
+  if (mysql_num_rows($upd)) {
+    /*Last update, days ago*/
+      $result = db_query('
+        SELECT DATEDIFF(NOW(),previous.field_date_value) days_between FROM
+        (
+        	SELECT DISTINCT ctu.* FROM content_type_update ctu WHERE ctu.field_related_product_nid = '.$node->nid.' && (ctu.field_update_type_value = 2 || ctu.field_update_type_value = 3) ORDER BY ctu.field_date_value DESC LIMIT 1
+        ) AS previous
+      ');
+
+      $last_update = db_fetch_array($result);
+      $last_update_days_ago = $last_update['days_between'];
+    /*Last update, days ago*/
+
+    mysql_free_result($result);   
+
+    $result = db_query('SELECT DISTINCT ctu.* FROM content_type_update ctu WHERE ctu.field_related_product_nid = '.$node->nid.' && (ctu.field_update_type_value = 2 || ctu.field_update_type_value = 3) ORDER BY ctu.field_date_value DESC');
+    
+    /*Counting average days between updates*/
+      $between_sum = 0;
+      
+      while ($update = db_fetch_object($result)) {
+        $btwu = db_fetch_array(db_query('
+          SELECT DATEDIFF("'.$update->field_date_value.'",previous.field_date_value) days_between FROM
+          (
+          	SELECT * FROM
+          	(
+          		(
+          			SELECT DISTINCT ctu.* FROM content_type_update ctu WHERE ctu.field_related_product_nid = '.$node->nid.' && (ctu.field_update_type_value = 1 || ctu.field_update_type_value = 2 || ctu.field_update_type_value = 3)
+          		) UNION (
+      				SELECT DISTINCT ctu.* FROM content_type_update ctu WHERE ctu.field_related_product_nid = '.$node->nid.' && ctu.field_update_type_value != 4 ORDER BY ctu.field_date_value ASC LIMIT 1
+          		)
+          	) AS dates
+          	WHERE dates.field_date_value < "'.$update->field_date_value.'" ORDER BY field_date_value DESC LIMIT 1
+          ) AS previous
+				'));
+
+        if ($btwu['days_between']) {
+          $updates[] =  array('days_between' => $btwu['days_between']) + array('date' => format_date(strtotime($update->field_date_value),'medium',NULL,25200));
+        }        
+        $between_sum += $btwu['days_between'];
+        $days[] = $btwu['days_between'];
+      }
+      $dbu_average = round($between_sum/mysql_num_rows($result));
+    /*Counting average days between updates*/
+  }
+
+/*It's important for us to know is there any updates in the this project*/
+?>
+
+<?php if ($page != 0) { ?>
+<div class="<?php print $type?> node" style="margin-bottom:30px;">
+	<?php if (user_access('administer nodes')) {?>
+	<ul class="admin-controls">
+		<li class="delete"><?php print l(t('delete'),'node/'.$nid.'/delete'); ?></li>
+  	<li class="edit"><?php print l(t('edit'),'node/'.$nid.'/edit'); ?></li>  	
+	</ul>
+	<?php }?>
+	<table class="header">
+		<tr>
+    	<td class="icon"><?php print $field_icon['0']['view'];?></td>
+    	<td class="related-group">
+    		<?php 
+    		  if ($field_related_group['0']['view']) {
+    		    print '<h1>'.$title.'</h1>';
+    		    print $field_related_group['0']['view'];
+    		  } else {
+    		    print '<h1>'.$title.'</h1>';
+    		  }
+    		?>
+    	</td>
+  	</tr>
+  </table>
+	<div class="apple-links">
+		<?php print $field_product_url['0']['view'] && $field_feedback_url['0']['view'] ? $field_product_url['0']['view'].' | '.$field_feedback_url['0']['view'] : $field_product_url['0']['view'].$field_feedback_url['0']['view'];?>
+		|<a href ="http://mactimeline.com/?q=featured">SUBMIT FEATURE ReQUEST</a>
+	</div>
+	
+	<table border="1" width = "830">
+  <tr>
+    <th style ="background-color: #999999; color:#FFFFFF;">Feature Request</th>
+    <th style ="background-color: #999999;"><a href ="http://mactimeline.com/?q=featured">Submit feature Request</a></th>
+  </tr>
+<?php $query = db_query("SELECT * FROM reservation");
+while($row = db_fetch_array($query))
+  { ?>
+  <tr>
+    <td><?php echo $row['name'] ;?></td>
+	<td><?php echo $row['company_name'] ;?></td>
+	<?php }?>
+  </tr>
+</table>
+	<?php print theme('blocks','group_products');?>
+	<?php print $node->content['group_prices']['#children']; ?>
+	<?php
+	  $view = views_get_view('updates');
+    $display = $view->execute_display('block_2');
+    if ($display) {
+      print '<h2 class="clear">'.$display['subject'];
+      print db_fetch_array($upd) ? '<span>'.t('Last key update: !num',array('!num' => isset($last_update_days_ago) ? $last_update_days_ago==0 ? t('Today') : format_plural($last_update_days_ago,'1 day',t('@count days ago')) : t('Never'))).'</span><span>'.t('Average: !num',array('!num' => $dbu_average ? format_plural($dbu_average,t('1 day'),t('@count days')) : t('Will soon'))).'</span>':null;
+      print '</h2>';
+      print $display['content'];
+    }
+    if (!$field_related_group['0']['view']) {
+      unset($view);
+      unset($display);
+      $view = views_get_view('updates');
+      $display = $view->execute_display('block_4');
+      if ($display) {
+        print '<h2 class="clear">'.$display['subject'];
+        print db_fetch_array($upd) ? '<span>'.t('Last key update: !num',array('!num' => isset($last_update_days_ago) ? $last_update_days_ago==0 ? t('Today') : format_plural($last_update_days_ago,'1 day',t('@count days ago')) : t('Never'))).'</span><span>'.t('Average: !num',array('!num' => $dbu_average ? format_plural($dbu_average,t('1 day'),t('@count days')) : t('Will soon'))).'</span>':null;
+        print '</h2>';
+        print $display['content'];
+      }
+    }
+  ?>
+  <?php if (db_fetch_array($upd) && $updates) { ?>
+  	<h2>Between updates</h2>
+
+		<?php
+			$dbu_max = 0;
+			for($i=0;$i<count($days);$i++) {
+				if($days[$i]>$dbu_max) $dbu_max = $days[$i];
+			}
+ 			if ($dbu_max > $dbu_average*2) {
+				$ug_max = $dbu_max + 10;
+			} else {
+				$ug_max = $dbu_average * 2;				
+			}			
+			$ug_max = round(ceil($ug_max/150)*10,-1)*15;
+		?>			
+		<ul id="update-graphic">
+		<?php
+		  foreach ($updates as $unode) {			    
+	  		$bar_width = ($unode['days_between']*100)/$ug_max;
+	      print '<li><div class="ug-date">'.$unode['date'].'</div><div class="ug-bar-width"><div class="ug-bar" style="width:'.$bar_width.'%"></div></div></li>';
+		  }
+		?>
+		</ul>
+		<div id="ug-average" style="margin-top:-<?php print (count($updates)*23);?>px"><div style="width:<?php print (($dbu_average*100)/$ug_max);?>%; height:<?php print ((count($updates)*23) - 5);?>px;"></div></div>
+		<div id="ug-scale" style="height:<?php print ((count($updates)*23) + 15);?>px; margin-top:-<?php print (count($updates)*23);?>px">
+			<ul style="padding-top:<?php print (count($updates)*23);?>px;">
+				<?php 
+					unset($i);
+					$scale_item = $ug_max/15;
+					for($i=0;$i<15;$i++) {
+						$scale_item_next += $scale_item;
+						print '<li>'.$scale_item_next.'</li>';
+					}
+				?>
+			</ul>
+		</div>			
+  <?php } ?>   
+</div>
+<?php } ?>

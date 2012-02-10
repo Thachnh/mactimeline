@@ -1,0 +1,157 @@
+# $Id: countdowntimer.pot,v 1.1.2.2 2008/04/15 14:23:26 jvandervort Exp $
+#
+# LANGUAGE translation of Drupal (general)
+# Copyright YEAR NAME <EMAIL@ADDRESS>
+# Generated from files:
+#  countdowntimer.module,v 1.8.2.22.2.4.2.13 2008/04/10 22:56:19 jvandervort
+#  countdowntimer.info,v 1.2.2.7.2.1 2007/09/18 18:49:50 jvandervort
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"POT-Creation-Date: 2008-04-14 22:58+0200\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Last-Translator: NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+
+#: countdowntimer.module:20
+msgid "A module which creates javascript countdown timers."
+msgstr ""
+
+#: countdowntimer.module:112
+msgid "Javascript"
+msgstr ""
+
+#: countdowntimer.module:117
+msgid "Javascript load options"
+msgstr ""
+
+#: countdowntimer.module:119
+msgid "Nodes only"
+msgstr ""
+
+#: countdowntimer.module:119
+msgid "Every page"
+msgstr ""
+
+#: countdowntimer.module:119;124
+msgid "Page list"
+msgstr ""
+
+#: countdowntimer.module:120
+msgid "Node view will only load when a single node is viewed.  Every page, is well, EVERY PAGE.  Page list will use the list below."
+msgstr ""
+
+#: countdowntimer.module:126
+msgid "Enter one page per line as Drupal paths. The '*' character is a wildcard. Example paths are %blog for the blog page and %blog-wildcard for every personal blog. %front is the front page."
+msgstr ""
+
+#: countdowntimer.module:132
+msgid "Output Overrides"
+msgstr ""
+
+#: countdowntimer.module:134
+msgid "Output formats change the display of the timer.  The global format is used unless you choose a preset in the timer tags.  You can hard-code the output format in the timer tags as well.  Available replacement values are: %day%, %month%, %year%, %dow%, %moy%, %years%, %ydays%, %days%, %hours%, %mins%, and %secs%."
+msgstr ""
+
+#: countdowntimer.module:140
+msgid "Global output format"
+msgstr ""
+
+#: countdowntimer.module:142
+msgid "The global output format is the baseline unless you use the presets below."
+msgstr ""
+
+#: countdowntimer.module:149
+msgid "Output format preset 1"
+msgstr ""
+
+#: countdowntimer.module:155
+msgid "Output format preset 2"
+msgstr ""
+
+#: countdowntimer.module:161
+msgid "Output format preset 3"
+msgstr ""
+
+#: countdowntimer.module:168
+msgid "Highlight settings"
+msgstr ""
+
+#: countdowntimer.module:169
+msgid "When a timer is nearing completion, you can change its' color or use css formatting."
+msgstr ""
+
+#: countdowntimer.module:176
+msgid "Highlight tagging"
+msgstr ""
+
+#: countdowntimer.module:178
+msgid "Use style=\"color:red;background-color:white;\" or class=\"\" etc..."
+msgstr ""
+
+#: countdowntimer.module:183
+msgid "Highlight threshold (minutes)"
+msgstr ""
+
+#: countdowntimer.module:185
+msgid "Number of minutes left before highlighting is applied."
+msgstr ""
+
+#: countdowntimer.module:192
+msgid "Timer complete statement"
+msgstr ""
+
+#: countdowntimer.module:194
+msgid "Statement that prints when a timer has completed."
+msgstr ""
+
+#: countdowntimer.module:199
+msgid "Clock type"
+msgstr ""
+
+#: countdowntimer.module:201
+msgid "12 Hour"
+msgstr ""
+
+#: countdowntimer.module:201
+msgid "24 Hour"
+msgstr ""
+
+#: countdowntimer.module:202
+msgid "There aren't many clock settings right now, but I'll add them slowly over time."
+msgstr ""
+
+#: countdowntimer.module:214
+msgid "Countdown Timer admin settings may not contain single quotes(')."
+msgstr ""
+
+#: countdowntimer.module:46
+msgid "Countdown Timer"
+msgstr ""
+
+#: countdowntimer.module:47
+msgid "Configure the Countdown timer's display format"
+msgstr ""
+
+#: countdowntimer.module:54
+msgid "none"
+msgstr ""
+
+#: countdowntimer.module:0
+msgid "countdowntimer"
+msgstr ""
+
+#: countdowntimer.info:0
+msgid "Countdown timer"
+msgstr ""
+
+#: countdowntimer.info:0
+msgid "Provides a timer that counts down/up to a certain date-time."
+msgstr ""
+

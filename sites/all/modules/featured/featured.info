@@ -1,0 +1,12 @@
+; $Id: featured.info,v 1.4 2009/10/29 Shashi bhushan $
+name = Featured
+description = Featured idea for the Product.
+package = Featured Product
+version = VERSION
+core = 6.x
+
+; Information added by drupal.org packaging script on 2009-07-01
+version = "6.13"
+project = "drupal"
+datestamp = "1246481719"
+

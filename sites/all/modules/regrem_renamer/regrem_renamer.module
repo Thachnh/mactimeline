@@ -1,0 +1,26 @@
+<?php
+/**
+* Implementation of hook_help().
+*/
+function regrem_renamer_help($path, $arg) {
+  switch ($path) {
+    case 'admin/modules#description':
+      return t('Makes login block collapsible');
+  }
+}
+
+/**
+* Implementation of hook_form_alter().
+*/
+function regrem_renamer_form_alter(&$form, &$form_state, $form_id) {
+  if ($form_id == 'user_login_block'){
+       unset($form['links']);
+       $items = array();
+       if (variable_get('user_register', 1)) {
+           $items[] = '| ' . l(t('NEW USER'), 'user/register', array('title' => t('Create a new user account.'))). ' | ';
+       }
+       $items[] = l(t('FORGOT'), 'user/password', array('title' => t('Request new password')));
+       $form['links'] = array('#value' => theme('item_list', $items));
+  }
+}
+?>

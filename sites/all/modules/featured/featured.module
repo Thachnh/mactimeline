@@ -1,0 +1,402 @@
+<?php
+	function featured_menu() {
+	$items['featured'] = array(
+    'title' => 'Submit Featured Request',
+	'access callback' => TRUE,
+	'page callback' => 'drupal_get_form',
+    'page arguments' => array('reservation'),
+    'type' => MENU_CALLBACK,
+ );
+
+  $items['admin/featured'] = array(
+    'title' => 'Featured Request management',
+    'description' => "Manage your reservations.",
+    'position' => 'left',
+    'page callback' => 'system_admin_menu_block_page',
+    'access arguments' => array('access administration pages'),
+    'file' => 'system.admin.inc',
+    'file path' => drupal_get_path('module', 'system'),
+  );
+   $items['admin/featured/featured'] = array(
+    'title' => 'Featured Request',
+    'description' => 'Manage featured products.',
+	   'page callback' => 'drupal_get_form',
+    'page arguments' => array('reservation_admin_content'),
+    'access arguments' => array('administer users'),
+  );
+   $items['admin/changestatus'] = array(
+    'title' => 'Change Status',
+    'page callback' => 'changestatus',
+     'page arguments' => array(),
+    'access arguments' => array('administer users'),
+    'type' => MENU_CALLBACK,
+  );
+  $items['admin/featured/featured/list'] = array(
+    'title' => 'List',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -10,
+  );
+  return $items;
+}
+
+function reservation_theme() {
+  return array(
+    'reservation_admin_reservations' => array(
+      'arguments' => array('form' => NULL),
+    ),
+  );
+}
+
+
+function reservation(){
+	$form['#attributes'] = array('enctype' => 'multipart/form-data');
+	 $form['name'] = array('#type' => 'textfield',
+	 '#title' => t('Name'),
+	'#size' => 40,
+	'#maxlength' => '50',
+	'#required' => TRUE,
+	'#attributes'=>array('class'=>'reservinput'),
+	'#prefix'=>"<div style='height:15px'>&nbsp;</div>",
+	);
+	
+	$form['company_name'] = array('#type' => 'textfield',
+	'#title' => t('Website Name'),
+	  '#size' => 40,
+	 '#maxlength' => '100',
+	 '#required' => TRUE,
+	'#attributes'=>array('class'=>'reservinput'),
+	);
+
+	$form['email'] = array('#type' => 'textfield',
+	'#title' => t('Email'),
+	'#required' => TRUE,
+	'#size'	=> 40,
+	'#madlength' => '100',
+	'#attributes'=>array('class'=>'reservinput'),
+		
+	);
+	
+	$form['Feature'] = array('#type' => 'textfield',
+	 '#title' => t('Feature'),
+	 '#required' => TRUE,
+	'#size'	=> 40,
+	'#madlength' => '200',
+	'#attributes'=>array('class'=>'reservinput'),
+	
+	);
+
+	$form['comments'] = array('#type' => 'textarea',
+	'#title' => t('Feature Description'),
+	'#required' => TRUE,
+	'#cols'=> '35',
+	'#rows'=> '4',
+	'#atributes'=>array('class'=>'reservinput'),
+	);
+
+	$form['how_to_contact'] = array(
+	'#type' => 'radios',
+	'#title' => t('contact us?'),
+	'#default_value' => 'e',
+	'#options' => array( 'e' => 'By E-Mail', 'p' => 'By Phone'),
+	'#required' => TRUE,
+	'#atributes'=>array('class'=>'reservinput'),
+	); 
+
+	  $form['submit1'] = array('#type'=>'submit','#value' => 'Submit','#prefix'=>'<div>','#suffix'=>"</div>");
+  $form['submit'] = array('#value' =>"<div style='width:200px;float:left'>&nbsp;</div><div class='submit_btn'>
+<a href='#' onclick=\"javascript:document.getElementById('reservation').submit();\" style=\"border:solid 1px transparent;display:block;\"/>
+</div><div class='reset_btn'>
+<a href='#'/>
+</div>",'#suffix'=>"<div style='clear:both'></div></div>",'#prefix'=>"<div style='width:100%;float:left'>&nbsp</div>");
+
+  return $form;
+}
+
+function reservation_validate($form, &$form_state){
+	$ages='';
+	$form_state['values']['check_in_date1']=$_POST['check_in_date'];
+	$form_state['values']['check_out_date1']=$_POST['check_out_date'];
+	$form_state['values']['age'] = '';
+	if($form_state['values']['age_1'])
+		$ages = $ages.$form_state['values']['age_1'].", ";
+	if($form_state['values']['age_2'])
+		$ages = $ages.$form_state['values']['age_2'].", ";
+	if($form_state['values']['age_3'])
+		$ages = $ages.$form_state['values']['age_3'].", ";
+	if($form_state['values']['age_4'])
+		$ages = $ages.$form_state['values']['age_4'].", ";
+	if($form_state['values']['age_5'])
+		$ages = $ages.$form_state['values']['age_5'].", ";
+	$form_state['values']['age'] = $ages;
+}
+
+function reservation_submit($form, &$form_state){
+
+db_query("INSERT INTO reservation(name,company_name,address,email,Image,fax,comments,how_to_contact,created) VALUES ('%s', '%s', '%s', '%s','%s', '%d', '%s', '%s', '%s')",$form_state['values']['name'],$form_state['values']['company_name'],$form_state['values']['address'],$form_state['values']['email'],$form_state['values']['image'],$form_state['values']['fax'],$form_state['values']['comments'],$form_state['values']['how_to_contact'],date('Y-m-d h:i:s'));
+$message = "Hi <br />Reservation Request is received from ".$form_state['values']['name']. " with company name " .$form_state['values']['company_name']."  and address ".$form_state['values']['address']." with email id ".$form_state['values']['email'] ." Phone no ".$form_state['values']['phone']." with following details : <br /> Fax number: ".$form_state['values']['fax']."<br />Cheak in date ".$form_state['values']['check_in_date1']."<br />Check out Date:" .$form_state['values']['check_out_date1']."<br />Number of rooms: ".$form_state['values']['no_of_rooms']."<br />Room Type".$form_state['values']['room_type']."<br /> Pleaes login to suryamcleod.com for the details";
+            mimemail($form_state['values']['email'],'suryaresorts@gmail.com', t('Reservation request from suryamcleod.com'), $message,NULL, array(), NULL,array(), $mailkey = '__Reservation_Mail__');
+	drupal_set_message(t('Your request for the reservation has been saved successfully.'));
+	drupal_goto("thankyou");
+}
+
+
+/*-------------------------------------
+Admin section
+-------------------------------------*/
+
+/**
+ * Menu callback: content administration.
+ */
+function reservation_admin_content($form_state) {
+  if (isset($form_state['values']['operation']) && $form_state['values']['operation'] == 'delete') {
+    return reservation_multiple_delete_confirm($form_state, array_filter($form_state['values']['reservations']));
+  }
+  $form = reservation_filter_form();
+
+  $form['#theme'] = 'reservation_filter_form';
+  $form['admin']  = reservation_admin_reservations();
+
+
+  return $form;
+}
+
+
+/**
+ * Return form for node administration filters.
+ */
+function reservation_filter_form() {
+  $session = &$_SESSION['reservation_overview_filter'];
+  $session = is_array($session) ? $session : array();
+  $filters = reservation_filters();
+  $i = 0;
+  $form['filters'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Show only items where'),
+    '#theme' => 'reservation_filters',
+  );
+  $form['#submit'][] = 'reservation_filter_form_submit';
+  foreach ($filters as $key => $filter) {
+    $names[$key] = $filter['title'];
+    $form['filters']['status'][$key] = array('#type' => 'select', '#options' => $filter['options']);
+  }
+
+  $form['filters']['filter'] = array('#type' => 'radios', '#options' => $names, '#default_value' => 'status');
+  $form['filters']['buttons']['submit'] = array('#type' => 'submit', '#value' => (count($session) ? t('Refine') : t('Filter')));
+  if (count($session)) {
+    $form['filters']['buttons']['undo'] = array('#type' => 'submit', '#value' => t('Undo'));
+    $form['filters']['buttons']['reset'] = array('#type' => 'submit', '#value' => t('Reset'));
+  }
+
+  drupal_add_js('misc/form.js', 'core');
+  return $form;
+}
+
+
+/**
+ * List node administration filters that can be applied.
+ */
+function reservation_filters() {
+  // Regular filters
+  $filters['status'] = array(
+    'title' => t('status'),
+    'options' => array(
+      'status-0' => t('New Reservations'),
+      'status-1' => t('Entertained Reservation'),
+    ),
+  );
+  
+  return $filters;
+}
+
+/**
+ * Form builder: Builds the node administration overview.
+ */
+function reservation_admin_reservations() {
+
+  $filter = reservation_build_filter_query();
+  $result = pager_query(db_rewrite_sql('SELECT r.* FROM {reservation} r '. $filter['join'] . $filter['where'] .' ORDER BY r.created DESC'), 50, 0, NULL, $filter['args']);
+  // Enable language column if locale is enabled or if we have any node with language
+  $count = db_result(db_query("SELECT COUNT(*) FROM {reservation} r "));
+  $multilanguage = (module_exists('locale') || $count);
+/*  $form['options'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Update options'),
+    '#prefix' => '<div class="container-inline">',
+    '#suffix' => '</div>',
+  );
+  $options = array();
+  foreach (module_invoke_all('reservation_operations') as $operation => $array) {
+    $options[$operation] = $array['label'];
+  }
+  $form['options']['operation'] = array(
+    '#type' => 'select',
+    '#options' => $options,
+    '#default_value' => 'approve',
+  );
+  $form['options']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Update'),
+    '#submit' => array('node_admin_nodes_submit'),
+  );
+*/
+  $languages = language_list();
+  $destination = drupal_get_destination();
+  $reservations = array();
+  while ($reservation = db_fetch_object($result)) {
+    $reservations[$reservation->rid] = '';
+	 $form['title'][$reservation->rid] = array('#value' => $reservation->rid);
+    $form['name'][$reservation->rid] = array('#value' => $reservation->name);
+    $form['company_name'][$reservation->rid] =  array('#value' => $reservation->company_name);
+	$form['address'][$reservation->rid] =  array('#value' => $reservation->address);
+	$form['email'][$reservation->rid] =  array('#value' => $reservation->email);
+	$form['phone'][$reservation->rid] =  array('#value' => $reservation->phone);
+	$form['fax'][$reservation->rid] =  array('#value' => $reservation->fax);
+	$form['check_in_date'][$reservation->rid] =  array('#value' => $reservation->check_in_date);
+	$form['check_out_date'][$reservation->rid] =  array('#value' => $reservation->check_out_date);
+	$form['no_of_rooms'][$reservation->rid] =  array('#value' => $reservation->no_of_rooms);
+	$form['room_type'][$reservation->rid] =  array('#value' => $reservation->room_type);
+	$form['no_of_persons'][$reservation->rid] =  array('#value' => $reservation->no_of_persons);
+	$form['no_of_child'][$reservation->rid] =  array('#value' => $reservation->no_of_child);
+	$form['no_of_days'][$reservation->rid] =  array('#value' => $reservation->no_of_days);
+	$form['how_to_contact'][$reservation->rid] =  array('#value' => $reservation->how_to_contact);
+	$form['status'][$reservation->rid] =  array('#value' => $reservation->status);
+	$form['operations'][$reservation->rid] = array('#value' => l(t('changestatus'), 'admin/changestatus/'.$reservation->rid.'/'.$reservation->status, array('query' => $destination)));
+  }
+  //$form['reservation'] = array('#type' => 'checkboxes', '#options' => $reservations);
+  $form['pager'] = array('#value' => theme('pager', NULL, 50, 0));
+  $form['#theme'] = 'reservation_admin_reservations';
+  return $form;
+}
+
+/**
+ * Build query for node administration filters based on session.
+ */
+function reservation_build_filter_query() {
+  $filters = reservation_filters();
+
+  // Build query
+  $where = $args = array();
+  $join = '';
+  foreach ($_SESSION['reservation_overview_filter'] as $index => $filter) {
+    list($key, $value) = $filter;
+    switch ($key) {
+      case 'status':
+        // Note: no exploitable hole as $key/$value have already been checked when submitted
+        list($key, $value) = explode('-', $value, 2);
+        $where[] = 'r.'. $key .' = %d';
+        break;
+    }
+    $args[] = $value;
+  }
+  $where = count($where) ? 'WHERE '. implode(' AND ', $where) : '';
+
+  return array('where' => $where, 'join' => $join, 'args' => $args);
+}
+
+function theme_reservation_admin_reservations($form) {
+  // If there are rows in this form, then $form['title'] contains a list of
+  // the title form elements.
+   $has_posts = isset($form['title']) && is_array($form['title']);
+  $select_header = $has_posts ? theme('table_select_header_cell') : '';
+  $header = array($select_header,t('Name'), t('Company Name'),t('Address'),t('email'),t('Phone'),t('Fax'),t('Check In'),t('Check Out'),t('rooms'),t('type'),t('Person'),t('Child'),t('Days'),t('Contact By'),t('Status'));
+  $header[] = t('Operations');
+  $output = '';
+
+  $output .= drupal_render($form['options']);
+  if ($has_posts) {
+    foreach (element_children($form['title']) as $key) {
+      $row = array();
+      $row[] = drupal_render($form['reservation'][$key]);
+      $row[] = drupal_render($form['name'][$key]);
+      $row[] = drupal_render($form['company_name'][$key]);
+	  $row[] = drupal_render($form['address'][$key]);
+	  $row[] = drupal_render($form['email'][$key]);
+	  $row[] = drupal_render($form['phone'][$key]);
+	  $row[] = drupal_render($form['fax'][$key]);
+	  $row[] = date("d-M-y",strtotime(drupal_render($form['check_in_date'][$key])));
+	  $row[] = date("d-M-y",strtotime(drupal_render($form['check_out_date'][$key])));
+	  $row[] = drupal_render($form['no_of_rooms'][$key]);
+	  $row[] = drupal_render($form['room_type'][$key]);
+	  $row[] = drupal_render($form['no_of_persons'][$key]);
+	  $row[] = drupal_render($form['no_of_child'][$key]);
+	  $row[] = drupal_render($form['no_of_days'][$key]);
+	  $row[] = (drupal_render($form['how_to_contact'][$key])=='e'?'email':'phone');
+      $row[] = (drupal_render($form['status'][$key])?'Entertained':'new');
+      $row[] = drupal_render($form['operations'][$key]);
+      $rows[] = $row;
+    }
+
+  }
+  else {
+    $rows[] = array(array('data' => t('No posts available.'), 'colspan' => '6'));
+  }
+
+  $output .= theme('table', $header, $rows);
+  if ($form['pager']['#value']) {
+    $output .= drupal_render($form['pager']);
+  }
+
+  $output .= drupal_render($form);
+
+  return $output;
+}
+
+
+/**
+ * Implementation of hook_node_operations().
+ */
+function reservation_reservation_operations() {
+  $operations = array(
+    'Entertained Reservation' => array(
+      'label' => t('Entertained Reservation'),
+      'callback' => 'reservation_mass_update',
+      'callback arguments' => array('updates' => array('status' => 1)),
+    ),
+    'New Reservation' => array(
+      'label' => t('New Reservation'),
+      'callback' => 'reservation_mass_update',
+      'callback arguments' => array('updates' => array('status' => 0)),
+    ),
+    'delete' => array(
+      'label' => t('Delete Reservation'),
+      'callback' => NULL,
+    ),
+  );
+  return $operations;
+}
+
+/**
+ * Process result from node administration filter form.
+ */
+function reservation_filter_form_submit($form, &$form_state) {
+  $filters = reservation_filters();
+  switch ($form_state['values']['op']) {
+    case t('Filter'):
+    case t('Refine'):
+      if (isset($form_state['values']['filter'])) {
+        $filter = $form_state['values']['filter'];
+
+        // Flatten the options array to accommodate hierarchical/nested options.
+        $flat_options = form_options_flatten($filters[$filter]['options']);
+
+        if (isset($flat_options[$form_state['values'][$filter]])) {
+          $_SESSION['reservation_overview_filter'][] = array($filter, $form_state['values'][$filter]);
+        }
+      }
+      break;
+    case t('Undo'):
+      array_pop($_SESSION['reservation_overview_filter']);
+      break;
+    case t('Reset'):
+      $_SESSION['reservation_overview_filter'] = array();
+      break;
+  }
+}
+
+
+function changestatus($res=0,$st=0){
+	$status = $st?'0':'1';
+	db_query("update reservation set status = '".$status."' where rid = ".$res);
+	$destination = drupal_get_destination();
+	drupal_goto($destination);
+}

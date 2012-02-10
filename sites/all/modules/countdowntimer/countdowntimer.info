@@ -1,0 +1,11 @@
+; $Id: countdowntimer.info,v 1.2.2.7.2.1 2007/09/18 18:49:50 jvandervort Exp $
+name = "Countdown timer"
+description = "Provides a timer that counts down/up to a certain date-time."
+core = 6.x
+
+; Information added by drupal.org packaging script on 2009-07-26
+version = "6.x-2.21"
+core = "6.x"
+project = "countdowntimer"
+datestamp = "1248632420"
+

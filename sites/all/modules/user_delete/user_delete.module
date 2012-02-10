@@ -1,0 +1,1142 @@
+<?php
+
+/**
+ * @file
+ * Provide account cancellation methods and API to provide the same functionalty
+ * as Drupal 7 for cancelling accounts.
+ *
+ * Note: As of January 8, 2009 - 09:44 the issue is marked as fixed.
+ * And commited to Drupal 7, see http://drupal.org/node/8#comment-1188824
+ *
+ * @author
+ * ilo <inaki.lopez@gmail.com>
+ *
+ * @TASK: split forms into user_delete.pages.inc
+ * @TASK: move batch to user_delete.admin.inc
+ * @TASK: complete the node/comments/whatever batch processes
+ * @TODO: select to use status_canceled or status_deleted. Now status cancelled
+ *        is being used.
+ * @TODO: solve placeholders to tokens conversion during upgrade path.
+ * @TODO: what about other modules? triggers? track? profile?
+
+ */
+
+/**
+ * Implementation of hook_perm().
+ */
+function user_delete_perm() {
+  return array('cancel account', 'select account cancellation method');
+}
+
+/**
+ * Implementation of hook_menu().
+ */
+function user_delete_menu() {
+  $items['admin/user/user_delete'] = array(
+    'title' => 'User delete',
+    'description' => "Configure the user delete methods.",
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('user_delete_settings'),
+    'access arguments' => array('administer users'),
+    'file' => 'user_delete.admin.inc',
+  );
+  $items['user/%user/delete/confirm/%/%'] = array(
+    'title' => 'Confirm account cancellation',
+    'page callback' => 'user_delete_cancel_confirm',
+    'page arguments' => array(1, 4, 5),
+    'access callback' => 'user_delete_access',
+    'access arguments' => array(1),
+  );
+  return $items;
+}
+
+/**
+ * Create a custom acces control function to verify if a user has access to the
+ * user/%/delete menu entry.
+ */
+function user_delete_access($account) {
+  global $user;
+  return (user_access('administer users') || (user_access('cancel account') && $account->uid == $user->uid));
+}
+
+/**
+ * Implementation of hook_menu_alter().
+ *
+ * Take control of user/%/delete form and set the new access callback.
+ */
+function user_delete_menu_alter(&$callbacks) {
+  $callbacks['user/%user/delete']['access callback'] = 'user_delete_access';
+  $callbacks['user/%user/delete']['access arguments'] = array(1);
+  $callbacks['user/%user/delete']['type'] = MENU_CALLBACK;
+}
+
+/**
+ * Implementation of hook_form_alter().
+ *
+ * Perform several modifications to mimic the way Drupal 7 handle account
+ * cancellation. The modified forms are:
+ * - user_admin_account: for bulk operation on admin/user/user.
+ * - user_profile_form: to set cancel button when permission is set.
+ * - user_confirm_delete: to show the cancel methods when required.
+ * - user_multiple_delete_confirm: show cancel methods for bulk updates also.
+ */
+function user_delete_form_alter(&$form, $form_state, $form_id) {
+  global $user;
+
+  if ($form_id == 'user_admin_account') {
+    // Change title to show Cancel instead of delete
+    $form['options']['operation']['#options']['delete'] = t('Cancel the selected accounts');
+  }
+
+  if ($form_id == 'user_profile_form') {
+    // Replace 'Delete' button label with 'Cancel account'
+    if (user_access('administer users') || (user_access('cancel account') && $form['#uid'] == $user->uid)) {
+      $form['delete'] = array(
+        '#type' => 'submit',
+        '#value' => t('Cancel account'),
+        '#weight' => 31,
+        '#submit' => array('user_edit_delete_submit'),
+      );
+    }
+    /*
+     * There are some reasons to keep this check commented. There are modules
+     * that already protect this button to appear, and Drupal 6 has not an 
+     * special administrators group by default that can take control of the 
+     * site if uid 1 is removed.  
+     */
+    //if ($user->uid == 1) {
+    //  unset($form['delete']);
+    //}
+  }
+
+  // Take control of the user multiple delete confirmation form
+  if ($form_id == 'user_multiple_delete_confirm') {
+
+    drupal_set_title(t('Are you sure you want to cancel these user accounts?'));
+
+    $form['user_cancel_method'] = array(
+      '#type' => 'item',
+      '#title' => t('When cancelling these accounts'),
+    );
+    $form['user_cancel_method'] += user_delete_cancel_methods();
+    // Remove method descriptions.
+    foreach (element_children($form['user_cancel_method']) as $element) {
+      unset($form['user_cancel_method'][$element]['#description']);
+    }
+
+    // Allow to send the account cancellation confirmation mail.
+    $form['user_cancel_confirm'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Require e-mail confirmation to cancel account.'),
+      '#default_value' => FALSE,
+      '#description' => t('When enabled, the user must confirm the account cancellation via e-mail.'),
+    );
+    // Also allow to send account canceled notification mail, if enabled.
+    $form['user_cancel_notify'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Notify user when account is canceled.'),
+      '#default_value' => FALSE,
+      '#access' => variable_get('user_mail_status_canceled_notify', FALSE),
+      '#description' => t('When enabled, the user will receive an e-mail notification after the account has been cancelled.'),
+    );
+
+    unset($form['description']);
+    $form['description']['#value'] = $description;
+
+    // Short control fields and set a new submit handler for this form.
+    $form['actions']['#weight'] = 31;
+    $form['actions']['submit']['#value'] = t('Cancel accounts');
+
+    $form['#submit'] = array('user_delete_multiple_confirm_submit');
+
+  }
+
+  // Take control of the user delete confirmation form
+  if ($form_id == 'user_confirm_delete') {
+
+    $account = $form['_account']['#value'];
+
+    // Display account cancellation method selection, if allowed.
+    $default_method = variable_get('user_cancel_method', 'user_cancel_block');
+    $admin_access = user_access('administer users');
+    $can_select_method = $admin_access || user_access('select account cancellation method');
+    $form['user_cancel_method'] = array(
+      '#type' => 'item',
+      '#title' => ($account->uid == $user->uid ? t('When cancelling your account') : t('When cancelling the account')),
+      '#access' => $can_select_method,
+    );
+    $form['user_cancel_method'] += user_delete_cancel_methods();
+
+    // Allow user administrators to skip the account cancellation confirmation
+    // mail (by default), as long as they do not attempt to cancel their own
+    // account.
+    $override_access = $admin_access && ($account->uid != $user->uid);
+    $form['user_cancel_confirm'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Require e-mail confirmation to cancel account.'),
+      '#default_value' => ($override_access ? FALSE : TRUE),
+      '#access' => $override_access,
+      '#description' => t('When enabled, the user must confirm the account cancellation via e-mail.'),
+    );
+    // Also allow to send account canceled notification mail, if enabled.
+    $default_notify = variable_get('user_mail_status_canceled_notify', FALSE);
+    $form['user_cancel_notify'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Notify user when account is canceled.'),
+      '#default_value' => ($override_access ? FALSE : $default_notify),
+      '#access' => $override_access && $default_notify,
+      '#description' => t('When enabled, the user will receive an e-mail notification after the account has been cancelled.'),
+    );
+
+    // Prepare confirmation form page title and description.
+    if ($account->uid == $user->uid) {
+      $question = t('Are you sure you want to cancel your account?');
+    }
+    else {
+      $question = t('Are you sure you want to cancel the account %name?', array('%name' => $account->name));
+    }
+    $description = '';
+    if ($can_select_method) {
+      $description = t('Select the method to cancel the account above.');
+      foreach (element_children($form['user_cancel_method']) as $element) {
+        unset($form['user_cancel_method'][$element]['#description']);
+      }
+    }
+    else {
+      // The radio button #description is used as description for the confirmation
+      // form.
+      foreach (element_children($form['user_cancel_method']) as $element) {
+        if ($form['user_cancel_method'][$element]['#default_value'] == $form['user_cancel_method'][$element]['#return_value']) {
+          $description = $form['user_cancel_method'][$element]['#description'];
+        }
+        unset($form['user_cancel_method'][$element]['#description']);
+      }
+    }
+
+    // Always provide entity id in the same form key as in the entity edit form.
+    $form['uid'] = array('#type' => 'value', '#value' => $account->uid);
+    
+    // Set new title and description
+    drupal_set_title(t('Are you sure you want to cancel the account %name?', array('%name' => $form['_account']['#value']->name)));
+    unset($form['description']);
+    $form['description']['#value'] = $description;
+
+    // Short control fields and set a new submit handler for this form.
+    $form['actions']['#weight'] = 31;
+    $form['actions']['submit']['#value'] = t('Cancel account');
+
+    $form['#submit'] = array('user_delete_confirm_form_submit');
+
+  }
+
+}
+
+/**
+ * Submit handler for mass-account cancellation form.
+ *
+ * @see user_multiple_cancel_confirm()
+ * @see user_cancel_confirm_form_submit()
+ */
+function user_delete_multiple_confirm_submit($form, &$form_state) {
+  global $user;
+
+  if ($form_state['values']['confirm']) {
+    foreach ($form_state['values']['accounts'] as $uid => $value) {
+      // Prevent programmatic form submissions from cancelling user 1.
+      if ($uid <= 1) {
+        continue;
+      }
+      // Prevent user administrators from deleting themselves without confirmation.
+      if ($uid == $user->uid) {
+        $admin_form_state = $form_state;
+        unset($admin_form_state['values']['user_cancel_confirm']);
+        $admin_form_state['values']['_account'] = $user;
+        user_delete_confirm_form_submit(array(), $admin_form_state);
+      }
+      else {
+        user_delete_cancel($form_state['values'], $uid, $form_state['values']['user_cancel_method']);
+      }
+    }
+  }
+  $form_state['redirect'] = 'admin/user/user';
+}
+
+
+/**
+ * Submit handler for the account cancellation confirm form.
+ *
+ * @see user_cancel_confirm_form()
+ * @see user_multiple_cancel_confirm_submit()
+ */
+function user_delete_confirm_form_submit($form, &$form_state) {
+  global $user;
+  $account = $form_state['values']['_account'];
+
+  // Cancel account immediately, if the current user has administrative
+  // privileges, no confirmation mail shall be sent, and the user does not
+  // attempt to cancel the own account.
+  if (user_access('administer users') && empty($form_state['values']['user_cancel_confirm']) && $account->uid != $user->uid) {
+    user_delete_cancel($form_state['values'], $account->uid, $form_state['values']['user_cancel_method']);
+
+    $form_state['redirect'] = 'admin/user/user';
+  }
+  else {
+    // Store cancelling method and whether to notify the user in $account for
+    // user_cancel_confirm().
+    $edit = array(
+      'user_cancel_method' => $form_state['values']['user_cancel_method'],
+      'user_cancel_notify' => $form_state['values']['user_cancel_notify'],
+    );
+    $account = user_save($account, $edit);
+    _user_mail_notify('cancel_confirm', $account);
+    drupal_set_message(t('A confirmation request to cancel your account has been sent to your e-mail address.'));
+    watchdog('user', 'Sent account cancellation request to %name %email.', array('%name' => $account->name, '%email' => '<' . $account->mail . '>'), WATCHDOG_NOTICE);
+
+    $form_state['redirect'] = "user/$account->uid";
+  }
+}
+
+/**
+ * Cancel a user account. This function is the Drupal 6 version of user_cancel
+ *
+ * Copied from Drupal 7 user.module, modified version for Drupal 6
+ *
+ * Since the user cancellation process needs to be run in a batch, either
+ * Form API will invoke it, or batch_process() needs to be invoked after calling
+ * this function and should define the path to redirect to.
+ *
+ * @param $edit
+ *   An array of submitted form values.
+ * @param $uid
+ *   The user ID of the user account to cancel.
+ * @param $method
+ *   The account cancellation method to use.
+ *
+ * @see _user_cancel()
+ */
+function user_delete_cancel($edit, $uid, $method) {
+  global $user;
+
+  $account = user_load(array('uid' => $uid));
+
+  if (!$account) {
+    drupal_set_message(t('The user account %id does not exist.', array('%id' => $uid)), 'error');
+    watchdog('user', 'Attempted to cancel non-existing user account: %id.', array('%id' => $uid), WATCHDOG_ERROR);
+    return;
+  }
+
+  // Initialize batch (to set title).
+  $batch = array(
+    'title' => t('Cancelling account'),
+    'operations' => array(),
+  );
+  batch_set($batch);
+
+  // Modules use hook_user_delete() to respond to deletion.
+  // This is true in Drupal 7, but not in Drupal 6, so this check is commented.
+//  if ($method != 'user_cancel_delete') {
+    // Allow modules to add further sets to this batch.
+    module_invoke_all('user_cancel', $edit, $account, $method);
+//  }
+
+  // Finish the batch and actually cancel the account.
+  $batch = array(
+    'title' => t('Cancelling user account'),
+    'operations' => array(
+      array('_user_delete_cancel', array($edit, $account, $method)),
+    ),
+  );
+  batch_set($batch);
+
+  // Batch processing is either handled via Form API or has to be invoked
+  // manually.
+}
+
+/**
+ * Last batch processing step for cancelling a user account.
+ *
+ * Since batch and session API require a valid user account, the actual
+ * cancellation of a user account needs to happen last.
+ *
+ * @see user_cancel()
+ */
+function _user_delete_cancel($edit, $account, $method) {
+  global $user;
+
+  switch ($method) {
+    case 'user_cancel_block':
+    case 'user_cancel_block_unpublish':
+    default:
+      // Send account blocked notification if option was checked.
+      if (!empty($edit['user_cancel_notify'])) {
+        _user_mail_notify('status_blocked', $account);
+      }
+      user_save($account, array('status' => 0));
+      drupal_set_message(t('%name has been disabled.', array('%name' => $account->name)));
+      watchdog('user', 'Blocked user: %name %email.', array('%name' => $account->name, '%email' => '<' . $account->mail . '>'), WATCHDOG_NOTICE);
+      break;
+
+    // This is default's Drupal 6 behavior, but comments are not really
+    // anonymized, they are marked as not confirmed, so this needs some
+    // tweaks..
+    case 'user_cancel_reassign':
+    case 'user_cancel_delete':
+      // Send account canceled notification if option was checked.
+      if (!empty($edit['user_cancel_notify'])) {
+        _user_mail_notify('status_canceled', $account);
+      }
+      user_delete(array(), $account->uid);
+      drupal_set_message(t('%name has been deleted.', array('%name' => $account->name)));
+      watchdog('user', 'Deleted user: %name %email.', array('%name' => $account->name, '%email' => '<' . $account->mail . '>'), WATCHDOG_NOTICE);
+      break;
+  }
+
+  // After cancelling account, ensure that user is logged out.
+  if ($account->uid == $user->uid) {
+    // Destroy the current session, and reset $user to the anonymous user.
+    session_destroy();
+  }
+
+  // Clear the cache for anonymous users.
+  cache_clear_all();
+}
+
+/**
+ * Menu callback; Cancel a user account via e-mail confirmation link.
+ */
+function user_delete_cancel_confirm($account, $timestamp = 0, $hashed_pass = '') {
+  // Time out in seconds until cancel URL expires; 24 hours = 86400 seconds.
+  $timeout = 86400;
+  $current = time();
+  // Is it unserialized already?
+  $account->data = (is_array($account->data)) ? $account->data : unserialize($account->data);
+
+  // Basic validation of arguments.
+  if (isset($account->data['user_cancel_method']) && !empty($timestamp) && !empty($hashed_pass)) {
+    // Validate expiration and hashed password/login.
+    if ($timestamp <= $current && $current - $timestamp < $timeout && $account->uid && $timestamp >= $account->login && $hashed_pass == user_pass_rehash($account->pass, $timestamp, $account->login)) {
+      $edit = array(
+        'user_cancel_notify' => isset($account->data['user_cancel_notify']) ? $account->data['user_cancel_notify'] : variable_get('user_mail_status_canceled_notify', FALSE),
+      );
+      user_delete_cancel($edit, $account->uid, $account->data['user_cancel_method']);
+      // Since user_delete_cancel() is not invoked via Form API, batch processing needs
+      // to be invoked manually and should redirect to the front page after
+      // completion.
+      batch_process('');
+    }
+    else {
+      drupal_set_message(t('You have tried to use an account cancellation link that has expired. Please request a new one using the form below.'));
+      drupal_goto("user/$account->uid/delete");
+    }
+  }
+  drupal_access_denied();
+}
+
+/**
+ * Helper function to return available account cancellation methods.
+ *
+ * Backport of D7 version of user_cancel_methods
+ *
+ * @return
+ *   An array containing all account cancellation methods as form elements.
+ *
+ * @see hook_user_cancel_methods_alter()
+ * @see user_admin_settings()
+ * @see user_cancel_confirm_form()
+ * @see user_multiple_cancel_confirm()
+ */
+function user_delete_cancel_methods() {
+  $methods = array(
+    'user_cancel_block' => array(
+      'title' => t('Disable the account and keep all content.'),
+      'description' => t('Your account will be blocked and you will no longer be able to log in. All of your content will remain attributed to your user name.'),
+    ),
+    'user_cancel_block_unpublish' => array(
+      'title' => t('Disable the account and unpublish all content.'),
+      'description' => t('Your account will be blocked and you will no longer be able to log in. All of your content will be hidden from everyone but administrators.'),
+    ),
+    'user_cancel_reassign' => array(
+      'title' => t('Delete the account and make all content belong to the %anonymous-name user.', array('%anonymous-name' => variable_get('anonymous', t('Anonymous')))),
+      'description' => t('Your account will be removed and all account information deleted. All of your content will be assigned to the %anonymous-name user.', array('%anonymous-name' => variable_get('anonymous', t('Anonymous')))),
+    ),
+    'user_cancel_delete' => array(
+      'title' => t('Delete the account and all content.'),
+      'description' => t('Your account will be removed and all account information deleted. All of your content will also be deleted.'),
+      'access' => user_access('administer users'),
+    ),
+  );
+  // Allow modules to customize account cancellation methods.
+  drupal_alter('user_cancel_methods', $methods);
+
+  // Turn all methods into real form elements.
+  $default_method = variable_get('user_cancel_method', 'user_cancel_block');
+  foreach ($methods as $name => $method) {
+    $form[$name] = array(
+      '#type' => 'radio',
+      '#title' => $method['title'],
+      '#description' => (isset($method['description']) ? $method['description'] : NULL),
+      '#return_value' => $name,
+      '#default_value' => $default_method,
+      '#parents' => array('user_cancel_method'),
+    );
+  }
+  return $form;
+}
+
+/**
+ * Generate a URL to confirm an account cancellation request.
+ *
+ * @see user_mail_tokens()
+ * @see user_cancel_confirm()
+ */
+function user_delete_cancel_url($account) {
+  $timestamp = time();
+  return url("user/$account->uid/delete/confirm/$timestamp/" . user_pass_rehash($account->pass, $timestamp, $account->login), array('absolute' => TRUE));
+}
+
+/**
+ * Implements hook_mail_alter().
+ *
+ * We have no change to create the !cancelurl placeholder, so we need to keep
+ * track of these emails and replace that string with a valid cancellation
+ * url
+ */
+function user_delete_mail_alter(&$message) {
+  if ($message['id'] == 'user_cancel_confirm') {
+    $user_cancel_url = user_delete_cancel_url($message['params']['account']);
+    if (is_array($message['body'])) {
+      foreach ($message['body'] as $id => $content) {
+        $message['body'][$id] = str_replace('!cancelurl', $user_cancel_url, $message['body'][$id]);
+      }
+    }
+    else {  // Some modules use the body as a string, erroneously.
+      $message['body'][$id] = str_replace('!cancelurl', user_delete_cancel_url($message['params']['account']) , $message['body']);
+    }
+  }
+}
+
+
+/**
+ * End of API backport implementation. Now fill the gap between d6 and d7
+ * module behavior using hook_user_cancel.
+ */
+
+
+/**
+ * Implements hook_user_cancel();
+ *
+ * From here to bottom, default node, comments and the rest of modules
+ * hook_user_cancel implementation handled by Drupal 7.
+ *
+ * Node updates are done in batch.
+ *
+ */
+function user_delete_user_cancel($edit, $account, $method) {
+  switch ($method) {
+    // This method has nothing to do with content.
+    case 'user_cancel_block':
+      break;
+    // Take all content and unpublish.
+    case 'user_cancel_block_unpublish':
+      user_delete_node_cancel($edit, $account, $method);
+      user_delete_comment_cancel($edit, $account, $method);
+      //@TODO: update poll_vote to uid -> 0
+      break;
+    // The user will be deleted, reassign all content to uid 0.
+    case 'user_cancel_reassign':
+      user_delete_node_cancel($edit, $account, $method);
+      user_delete_comment_cancel($edit, $account, $method);
+      //@TODO: update poll_vote to uid -> 0
+      break;
+    // In this case the user and all content will really be deleted.
+    case 'user_cancel_delete':
+      user_delete_node_cancel($edit, $account, $method);
+      user_delete_comment_cancel($edit, $account, $method);
+      break;
+  }
+}
+
+
+
+/**
+ * Mimics hook_user_cancel() for node module.
+ */
+function user_delete_node_cancel($edit, $account, $method) {
+  switch ($method) {
+    case 'user_cancel_block_unpublish':
+      // Unpublish nodes (current revisions).
+      $result = db_query("SELECT nid FROM {node} WHERE uid = %d", $account->uid);
+      $nodes = array();
+      while ($nid = db_result($result)) {
+        $nodes[] = $nid;
+      };
+      user_delete_node_mass_update($nodes, array('status' => 0));
+      break;
+    case 'user_cancel_reassign':
+      // Anonymize nodes (current revisions).
+      $result = db_query("SELECT nid FROM {node} WHERE uid = %d", $account->uid);
+      $nodes = array();
+      while ($nid = db_result($result)) {
+        $nodes[] = $nid;
+      };
+      user_delete_node_mass_update($nodes, array('uid' => 0));
+      // Anonymize old revisions.
+      db_query("UPDATE {node_revisions} SET uid = 0 WHERE uid = %d", $account->uid);
+      // Anonymize history
+      db_query("UPDATE {history} SET uid = 0 WHERE uid = %d", $account->uid);
+      break;
+    case 'user_cancel_delete':
+      // Anonymize nodes (current revisions).
+      $result = db_query("SELECT nid FROM {node} WHERE uid = %d", $account->uid);
+      $nodes = array();
+      while ($nid = db_result($result)) {
+        $nodes[] = $nid;
+      };
+      user_delete_node_mass_delete($nodes);
+      break;
+  }
+}
+
+/**
+ * Make mass update of nodes, changing all nodes in the $nodes array
+ * to update them with the field values in $updates.
+ *
+ * IMPORTANT NOTE: This function is intended to work when called
+ * from a form submit handler. Calling it outside of the form submission
+ * process may not work correctly.
+ *
+ * @param array $nodes
+ *   Array of node nids to update.
+ * @param array $updates
+ *   Array of key/value pairs with node field names and the
+ *   value to update that field to.
+ */
+function user_delete_node_mass_update($nodes, $updates) {
+  // We use batch processing to prevent timeout when updating a large number
+  // of nodes.
+  if (count($nodes) > 10) {
+    $batch = array(
+      'operations' => array(
+        array('_user_delete_node_mass_update_batch_process', array($nodes, $updates))
+      ),
+      'finished' => '_user_delete_node_mass_update_batch_finished',
+      'title' => t('Processing'),
+      // We use a single multi-pass operation, so the default
+      // 'Remaining x of y operations' message will be confusing here.
+      'progress_message' => '',
+      'error_message' => t('The node update process has encountered an error.'),
+      // The operations do not live in the .module file, so we need to
+      // tell the batch engine which file to load before calling them.409
+      'file' => drupal_get_path('module', 'node') .'/node.admin.inc',
+    );
+    batch_set($batch);
+  }
+  else {
+    foreach ($nodes as $nid) {
+      _user_delete_node_mass_update_helper($nid, $updates);
+    }
+    drupal_set_message(t('The node update process has been performed.'));
+  }
+}
+
+/**
+ * Node Mass Update - helper function.
+ */
+function _user_delete_node_mass_update_helper($nid, $updates) {
+  $node = node_load($nid, NULL, TRUE);
+  foreach ($updates as $name => $value) {
+    $node->$name = $value;
+  }
+  node_save($node);
+  return $node;
+}
+
+/**
+ * Node Mass Update Batch operation
+ */
+function _user_delete_node_mass_update_batch_process($nodes, $updates, &$context) {
+  if (!isset($context['sandbox']['progress'])) {
+    $context['sandbox']['progress'] = 0;
+    $context['sandbox']['max'] = count($nodes);
+    $context['sandbox']['nodes'] = $nodes;
+  }
+
+  // Process nodes by groups of 5.
+  $count = min(5, count($context['sandbox']['nodes']));
+  for ($i = 1; $i <= $count; $i++) {
+    // For each nid, load the node, reset the values, and save it.
+    $nid = array_shift($context['sandbox']['nodes']);
+    $node = _user_delete_node_mass_update_helper($nid, $updates);
+
+    // Store result for post-processing in the finished callback.
+    $context['results'][] = l($node->title, 'node/'. $node->nid);
+
+    // Update our progress information.
+    $context['sandbox']['progress']++;
+  }
+
+  // Inform the batch engine that we are not finished,
+  // and provide an estimation of the completion level we reached.
+  if ($context['sandbox']['progress'] != $context['sandbox']['max']) {
+    $context['finished'] = $context['sandbox']['progress'] / $context['sandbox']['max'];
+  }
+}
+
+/**
+ * Node Mass Update Batch 'finished' callback.
+ */
+function _user_delete_node_mass_update_batch_finished($success, $results, $operations) {
+  if ($success) {
+    drupal_set_message(t('The node update has been performed.'));
+  }
+  else {
+    drupal_set_message(t('An error occurred during node update and processing did not complete.'), 'error');
+    $message = format_plural(count($results), '1 item successfully processed:', '@count items successfully processed:');
+    $message .= theme('item_list', $results);
+    drupal_set_message($message);
+  }
+}
+
+// Node cancel batch process end
+
+
+
+
+
+
+
+
+/**
+ * Make mass deletion of nodes.
+ *
+ * IMPORTANT NOTE: This function is intended to work when called
+ * from a form submit handler. Calling it outside of the form submission
+ * process may not work correctly.
+ *
+ * @param array $nodes
+ *   Array of node nids to update.
+ */
+function user_delete_node_mass_delete($nodes) {
+  // We use batch processing to prevent timeout when updating a large number
+  // of nodes.
+  if (count($nodes) > 10) {
+    $batch = array(
+      'operations' => array(
+        array('_user_delete_node_mass_delete_batch_process', array($nodes))
+      ),
+      'finished' => '_user_delete_node_mass_delete_batch_finished',
+      'title' => t('Processing'),
+      // We use a single multi-pass operation, so the default
+      // 'Remaining x of y operations' message will be confusing here.
+      'progress_message' => '',
+      'error_message' => t('The delete has encountered an error.'),
+      // The operations do not live in the .module file, so we need to
+      // tell the batch engine which file to load before calling them.409
+      'file' => drupal_get_path('module', 'node') .'/node.admin.inc',
+    );
+    batch_set($batch);
+  }
+  else {
+    foreach ($nodes as $nid) {
+      _user_delete_node_mass_delete_helper($nid);
+    }
+    drupal_set_message(t('The node delete process has been performed.'));
+  }
+}
+
+/**
+ * Node Mass Delete - helper function.
+ */
+function _user_delete_node_mass_delete_helper($nid) {
+  $node = node_load($nid, NULL, TRUE);
+  _user_delete_node_delete($node->nid);
+  return $node;
+}
+
+
+/**
+ * Delete a node without user access.
+ */
+function _user_delete_node_delete($nid) {
+
+  // Clear the cache before the load, so if multiple nodes are deleted, the
+  // memory will not fill up with nodes (possibly) already removed.
+  $node = node_load($nid, NULL, TRUE);
+
+  db_query('DELETE FROM {node} WHERE nid = %d', $node->nid);
+  db_query('DELETE FROM {node_revisions} WHERE nid = %d', $node->nid);
+
+  // Call the node-specific callback (if any):
+  node_invoke($node, 'delete');
+  node_invoke_nodeapi($node, 'delete');
+
+  // Clear the page and block caches.
+  cache_clear_all();
+
+  // Remove this node from the search index if needed.
+  if (function_exists('search_wipe')) {
+    search_wipe($node->nid, 'node');
+  }
+  watchdog('content', '@type: deleted %title.', array('@type' => $node->type, '%title' => $node->title));
+  drupal_set_message(t('@type %title has been deleted.', array('@type' => node_get_types('name', $node), '%title' => $node->title)));
+}
+
+
+
+/**
+ * Node Mass Delete Batch operation
+ */
+function _user_delete_node_mass_delete_batch_process($nodes, &$context) {
+  if (!isset($context['sandbox']['progress'])) {
+    $context['sandbox']['progress'] = 0;
+    $context['sandbox']['max'] = count($nodes);
+    $context['sandbox']['nodes'] = $nodes;
+  }
+
+  // Process nodes by groups of 5.
+  $count = min(5, count($context['sandbox']['nodes']));
+  for ($i = 1; $i <= $count; $i++) {
+    // For each nid, load the node, reset the values, and save it.
+    $nid = array_shift($context['sandbox']['nodes']);
+    $node = _user_delete_node_mass_delete_helper($nid);
+
+    // Store result for post-processing in the finished callback.
+    $context['results'][] = l($node->title, 'node/'. $node->nid);
+
+    // Update our progress information.
+    $context['sandbox']['progress']++;
+  }
+
+  // Inform the batch engine that we are not finished,
+  // and provide an estimation of the completion level we reached.
+  if ($context['sandbox']['progress'] != $context['sandbox']['max']) {
+    $context['finished'] = $context['sandbox']['progress'] / $context['sandbox']['max'];
+  }
+}
+
+/**
+ * Node Mass Delete Batch 'finished' callback.
+ */
+function _user_delete_node_mass_delete_batch_finished($success, $results, $operations) {
+  if ($success) {
+    drupal_set_message(t('The node delete process has been performed.'));
+  }
+  else {
+    drupal_set_message(t('An error occurred and processing did not complete.'), 'error');
+    $message = format_plural(count($results), '1 item successfully processed:', '@count items successfully processed:');
+    $message .= theme('item_list', $results);
+    drupal_set_message($message);
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
+/**
+ * Comment related stuff
+ */
+
+/**
+ * Mimics hook_user_cancel() for comment module.
+ */
+function user_delete_comment_cancel($edit, $account, $method) {
+  switch ($method) {
+    case 'user_cancel_block_unpublish':
+      // Unpublish comments.
+      $result = db_query("SELECT cid FROM {comments} WHERE uid = %d", $account->uid);
+      $cids = array();
+      while ($cid = db_result($result)) {
+        $cids[] = $cid;
+      };
+      // Set status to 1 put into moderation queue.
+      // @TODO: Also remove email and username..
+      user_delete_comment_mass_update($cids, array('status' => 1));
+      break;
+    case 'user_cancel_reassign':
+      // Anonymize comments.
+      $result = db_query("SELECT cid FROM {comments} WHERE uid = %d", $account->uid);
+      $cids = array();
+      while ($cid = db_result($result)) {
+        $cids[] = $cid;
+      };
+      user_delete_comment_mass_update($cids, array('uid' => 0));
+      break;
+    case 'user_cancel_delete':
+      // delete comments.
+      $result = db_query("SELECT cid FROM {comments} WHERE uid = %d", $account->uid);
+      $cids = array();
+      while ($cid = db_result($result)) {
+        $cids[] = $cid;
+      };
+      user_delete_comment_mass_delete($cids);
+  }
+}
+
+
+// Comment batch process code start
+
+
+/**
+ * Make mass update of comments, changing all comments in the $comments array
+ * to update them with the field values in $updates.
+ *
+ * IMPORTANT NOTE: This function is intended to work when called
+ * from a form submit handler. Calling it outside of the form submission
+ * process may not work correctly.
+ *
+ * @param array $comments
+ *   Array of node cids to update.
+ * @param array $updates
+ *   Array of key/value pairs with comment field names and the
+ *   value to update that field to.
+ */
+function user_delete_comment_mass_update($comments, $updates) {
+  // We use batch processing to prevent timeout when updating a large number
+  // of nodes.
+  if (count($comments) > 10) {
+    $batch = array(
+      'operations' => array(
+        array('_user_delete_comment_mass_update_batch_process', array($comments, $updates))
+      ),
+      'finished' => '_user_delete_comment_mass_update_batch_finished',
+      'title' => t('Processing'),
+      // We use a single multi-pass operation, so the default
+      // 'Remaining x of y operations' message will be confusing here.
+      'progress_message' => '',
+      'error_message' => t('The update has encountered an error.'),
+      // The operations do not live in the .module file, so we need to
+      // tell the batch engine which file to load before calling them.409
+//      'file' => drupal_get_path('module', 'node') .'/node.admin.inc',
+    );
+    batch_set($batch);
+  }
+  else {
+    foreach ($comments as $cid) {
+      _user_delete_comment_mass_update_helper($cid, $updates);
+    }
+    drupal_set_message(t('The comment update process has been performed.'));
+  }
+}
+
+/**
+ * comment Mass Update - helper function.
+ */
+function _user_delete_comment_mass_update_helper($cid, $updates) {
+  $comment = _user_delete_comment_load($cid);
+  foreach ($updates as $name => $value) {
+    $comment->$name = $value;
+  }
+  _user_delete_comment_save($comment);
+  return $comment;
+}
+
+// A copy of comment_get without user acces and only for existing comments.
+
+function _user_delete_comment_load($cid) {
+  $comment = db_fetch_object(db_query("SELECT * FROM {comments} WHERE cid = %d", $cid));
+  return $comment;
+}
+
+// A copy of comment_save without user access and only for existing comments.
+// @TODO: Should comment be converted to array before calling the update hook?
+function _user_delete_comment_save($comment) {
+
+  drupal_write_record('comments', $comment, 'cid');
+
+  foreach (module_implements('comment') as $name) {
+    $function = $name .'_comment';
+    $result = $function($comment, 'update');
+    if (isset($result) && is_array($result)) {
+      $return = array_merge($return, $result);
+    }
+    elseif (isset($result)) {
+      $return[] = $result;
+    }
+  }
+  // Add an entry to the watchdog log.
+  watchdog('content', 'Comment: updated %subject.', array('%subject' => $comment->subject), WATCHDOG_NOTICE, l(t('view'), 'node/'. $comment->nid, array('fragment' => 'comment-'. $comment->cid)));
+}
+
+/**
+ * comment Mass Update Batch operation
+ */
+function _user_delete_comment_mass_update_batch_process($comments, $updates, &$context) {
+  if (!isset($context['sandbox']['progress'])) {
+    $context['sandbox']['progress'] = 0;
+    $context['sandbox']['max'] = count($comments);
+    $context['sandbox']['comments'] = $comments;
+  }
+
+  // Process nodes by groups of 5.
+  $count = min(5, count($context['sandbox']['comments']));
+  for ($i = 1; $i <= $count; $i++) {
+    // For each nid, load the node, reset the values, and save it.
+    $cid = array_shift($context['sandbox']['comments']);
+    $comment = _user_delete_comment_mass_update_helper($cid, $updates);
+
+    // Store result for post-processing in the finished callback.
+    $context['results'][] = l( isset($comment->subject) ? $comment->subject : $comment->cid , 'node/'. $comment->nid, array('fragment' => 'comment-'. $comment->cid));
+
+    // Update our progress information.
+    $context['sandbox']['progress']++;
+  }
+
+  // Inform the batch engine that we are not finished,
+  // and provide an estimation of the completion level we reached.
+  if ($context['sandbox']['progress'] != $context['sandbox']['max']) {
+    $context['finished'] = $context['sandbox']['progress'] / $context['sandbox']['max'];
+  }
+}
+
+/**
+ * Comment Mass Update Batch 'finished' callback.
+ */
+function _user_delete_comment_mass_update_batch_finished($success, $results, $operations) {
+  if ($success) {
+    drupal_set_message(t('The comment update has been performed.'));
+  }
+  else {
+    drupal_set_message(t('An error occurred during comment update and processing did not complete.'), 'error');
+    $message = format_plural(count($results), '1 item successfully processed:', '@count items successfully processed:');
+    $message .= theme('item_list', $results);
+    drupal_set_message($message);
+  }
+}
+
+
+
+/**
+ * Make mass delete of comments
+ *
+ * IMPORTANT NOTE: This function is intended to work when called
+ * from a form submit handler. Calling it outside of the form submission
+ * process may not work correctly.
+ *
+ * @param array $comments
+ *   Array of comment cids to update.
+ */
+function user_delete_comment_mass_delete($comments) {
+  // We use batch processing to prevent timeout when updating a large number
+  // of nodes.
+  if (count($comments) > 10) {
+    $batch = array(
+      'operations' => array(
+        array('_user_delete_comment_mass_delete_batch_process', array($comments))
+      ),
+      'finished' => '_user_delete_comment_mass_delete_batch_finished',
+      'title' => t('Processing'),
+      // We use a single multi-pass operation, so the default
+      // 'Remaining x of y operations' message will be confusing here.
+      'progress_message' => '',
+      'error_message' => t('The delete has encountered an error.'),
+      // The operations do not live in the .module file, so we need to
+      // tell the batch engine which file to load before calling them.409
+//      'file' => drupal_get_path('module', 'node') .'/node.admin.inc',
+    );
+    batch_set($batch);
+  }
+  else {
+    foreach ($comments as $cid) {
+      _user_delete_comment_mass_delete_helper($cid);
+    }
+    drupal_set_message(t('The comment delete process has been performed.'));
+  }
+}
+
+/**
+ * comment Mass Update - helper function.
+ */
+function _user_delete_comment_mass_delete_helper($cid) {
+  $comment = _user_delete_comment_load($cid);
+  _user_delete_comment_delete_thread($comment);
+  return $comment;
+}
+
+/**
+ * Perform the actual deletion of a comment and all its replies.
+ *
+ * @param $comment
+ *   An associative array describing the comment to be deleted.
+ */
+function _user_delete_comment_delete_thread($comment) {
+  if (!is_object($comment) || !is_numeric($comment->cid)) {
+    watchdog('content', 'Cannot delete non-existent comment.', array(), WATCHDOG_WARNING);
+    return;
+  }
+
+  // Delete the comment:
+  db_query('DELETE FROM {comments} WHERE cid = %d', $comment->cid);
+  watchdog('content', 'Comment: deleted %subject.', array('%subject' => $comment->subject));
+
+  foreach (module_implements('comment') as $name) {
+    $function = $name .'_comment';
+    $result = $function($comment, 'delete');
+    if (isset($result) && is_array($result)) {
+      $return = array_merge($return, $result);
+    }
+    elseif (isset($result)) {
+      $return[] = $result;
+    }
+  }
+
+  // Delete the comment's replies
+  $result = db_query('SELECT c.*, u.name AS registered_name, u.uid FROM {comments} c INNER JOIN {users} u ON u.uid = c.uid WHERE pid = %d', $comment->cid);
+  while ($comment = db_fetch_object($result)) {
+    $comment->name = $comment->uid ? $comment->registered_name : $comment->name;
+    _user_delete_comment_delete_thread($comment);
+  }
+}
+
+/**
+ * comment Mass Update Batch operation
+ */
+function _user_delete_comment_mass_delete_batch_process($comments, &$context) {
+  if (!isset($context['sandbox']['progress'])) {
+    $context['sandbox']['progress'] = 0;
+    $context['sandbox']['max'] = count($comments);
+    $context['sandbox']['comments'] = $comments;
+  }
+
+  // Process nodes by groups of 5.
+  $count = min(5, count($context['sandbox']['comments']));
+  for ($i = 1; $i <= $count; $i++) {
+    // For each nid, load the node, reset the values, and save it.
+    $cid = array_shift($context['sandbox']['comments']);
+    $comment = _user_delete_comment_mass_delete_helper($cid);
+
+    // Store result for post-processing in the finished callback.
+    $context['results'][] = l( isset($comment->subject) ? $comment->subject : $comment->cid , 'node/'. $comment->nid, array('fragment' => 'comment-'. $comment->cid));
+
+    // Update our progress information.
+    $context['sandbox']['progress']++;
+  }
+
+  // Inform the batch engine that we are not finished,
+  // and provide an estimation of the completion level we reached.
+  if ($context['sandbox']['progress'] != $context['sandbox']['max']) {
+    $context['finished'] = $context['sandbox']['progress'] / $context['sandbox']['max'];
+  }
+}
+
+/**
+ * Comment Mass Update Batch 'finished' callback.
+ */
+function _user_delete_comment_mass_delete_batch_finished($success, $results, $operations) {
+  if ($success) {
+    drupal_set_message(t('The comment delete process has been performed.'));
+  }
+  else {
+    drupal_set_message(t('An error occurred during comment delete and processing did not complete.'), 'error');
+    $message = format_plural(count($results), '1 item successfully processed:', '@count items successfully processed:');
+    $message .= theme('item_list', $results);
+    drupal_set_message($message);
+  }
+}
+

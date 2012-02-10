@@ -1,0 +1,4 @@
+name = Mactimeline calendar
+package = "Mactimeline project"
+version = "1.0"
+core = "6.x"

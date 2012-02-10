@@ -1,0 +1,71 @@
+// $Id: CHANGELOG.txt,v 1.2 2010/03/09 23:26:16 webmaster Exp $
+
+NOTE: Please put most recent changes at the TOP of the list.
+
+2008-10-06
+  fixed bad path for the timer.js file and fixed a clock bug.
+2008-05-28
+  moved timerjs from a virtual path to an actual file in the files directory.  
+  this allows caching, translation, and otherwise normal file handling.
+  added one or two new strings to translate.
+2008-05-21
+  added more javascript error handling for bad dates and no dates.
+2008-04-10
+  added initial clock support.
+2008-03-14
+  #234299, added timer complete: url redirection and message box support.
+2008-03-05
+  #230451, fix for $Id CVS variable expansion.
+2008-03-03
+  Changed drupal_add_js call to set preprose=FALSE so aggregation does not take place.
+2008-02-14
+  Created branch for new microformat support using the class attribute.
+  This is not backward compatible with other branches.
+  If you use this version, you'll need to update your legacy data.
+  This will be the new format in the drupal 7.0 version.
+  The tz_hours attribute also was combined with the datetime attribute per ISO 8601.
+2008-01-10
+  Changed admin settings for overrides to textareas.
+2007-11-08
+  Added single page js loading options in the admin screen.
+2007-09-18
+  Created Drupal6 branch, and converted major functions.
+2007-09-11
+  Added the %years% and %ydays% format string replacements.
+2007-08-31
+  Changed the content-type of the javascript to text/javascript.  
+  Added the drupal_set_header for moshe.
+2007-08-30
+  Fixed the default timer direction(=down).
+  Set the default permissions for timerjs to everyone.
+  Added version ID string to the timerjs code.
+2007-07-17
+  Added new admin setting for javascript loading.
+  Added more admin setting form validation for single quotes.
+2007-06-07
+  Added highlighting for timers nearing completion (both in admin and per timer overrides).
+  Added per timer, timer complete statements
+2007-03-29
+  Moved admin settings from Site Building to Site Configuration
+2007-03-25
+  Added format_txt override which trumps the global formats.  
+    This allows you to have as many output formats as you like.  
+    These are placed directly in the node/block with the timer.
+  Revised help section to include node usage, and added a reference to please look at the readme.txt file.  No really.  Really:)
+2007-03-13
+  Removed timers from the timing loop after they have completed.
+  Added timer complete statement to admin screen.
+2007-02-27
+  Changed new span tag format, renamed: format_to_use to format_num to make room for format_ovr.
+2007-02-26
+  Added new span tag format.
+  Added support for counting up (dir parameter).
+2007-02-02 
+  Added format overrides so you can have 4 different output formats for your site.
+  Rewrote timing loop code to make it more efficient for large numbers of timers.
+  Added leading zeroes to hours, minutes, and seconds.
+2006-09-07 Fixed 0 days plural problem, updated docs.
+2006-09-06 Added admin menu for the timers' output format.
+2006-09-05 Added id attribrute programmatically so user doesn't have to.
+2006-09-01 Initial release of the countdowntimer module.
+

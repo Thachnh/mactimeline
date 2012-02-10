@@ -1,0 +1,1 @@
+RewriteEngine On # Turn on the rewriting engine RewriteRule ^pet-care/?$ .feature_request.php [NC,L] # Handle requests for "pet-care"

@@ -1,0 +1,7 @@
+name = "Custom Gallery"
+description = "Hooks for the Custom Gallery"
+package = "Custom Module"
+core = 6.x
+version = "6.x-1.0"
+
+ 

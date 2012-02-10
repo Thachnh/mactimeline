@@ -1,0 +1,4 @@
+; $Id$
+name = regrem_renamer
+description = ESEM: This module renames the default links in the login block from 'Create new account' and 'Request new password' to custom text and puts a separator between them both.
+core = 6.x

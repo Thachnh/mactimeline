@@ -1,0 +1,294 @@
+<?php
+
+
+function mactimeline_calendar_init() {
+  if (arg(0) === 'calendar') {
+    drupal_add_js(drupal_get_path('module', 'mactimeline_calendar') . '/' . 'mactimeline_calendar.js');
+  }
+}
+
+
+function mactimeline_calendar_menu() {
+  $items = array();
+
+  $items['calendar'] = array(
+    'page callback' => 'mactimeline_calendar_load',
+    'access arguments' => array('access content'),
+    'type' => MENU_NORMAL_ITEM
+  );
+  $items['calendar/%'] = array(
+    'page callback' => 'mactimeline_calendar_load',
+    'access arguments' => array('access content'),
+  	'page arguments' => array(1),
+    'type' => MENU_CALLBACK
+  );
+
+  return $items;
+}
+
+function mactimeline_calendar_year_selection() {
+  $result = mysql_query("
+  	SELECT DISTINCT DATE_FORMAT(STR_TO_DATE(year_value, '%Y-%m-%dT%T'), '%Y') as year_value FROM (
+    (SELECT ctu.field_date_value AS year_value FROM node LEFT JOIN content_type_update ctu ON node.vid = ctu.vid WHERE node.status <> 0 && node.type = 'update')
+    UNION
+    (SELECT cte.field_event_date_value AS year_value FROM node LEFT JOIN content_type_event cte ON node.vid = cte.vid WHERE node.status <> 0 && node.type = 'event')
+    ) as years ORDER BY year_value DESC
+  ");
+  $years = array();
+
+  while($date = db_fetch_object($result)){
+      $years[$date->year_value] = $date->year_value;
+  }
+  $form['year'] = array(
+    '#type' => 'select',
+    '#title' => 'YEAR',
+    '#default_value' => arg(1) ? arg(1) : date('Y',time()),
+    '#options' => $years,  
+    '#attributes' => array(
+      'onChange' => 'javascript:this.form.submit();',
+    ),
+  );
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Apply'),
+    '#attributes' => array(
+      'style' => 'display: none;',
+    ),
+  );
+  
+  return $form;
+}
+
+function mactimeline_calendar_year_unordered_list() {
+  $result = mysql_query("
+  	SELECT DISTINCT DATE_FORMAT(STR_TO_DATE(year_value, '%Y-%m-%dT%T'), '%Y') as year_value FROM (
+    (SELECT ctu.field_date_value AS year_value FROM node LEFT JOIN content_type_update ctu ON node.vid = ctu.vid WHERE node.status <> 0 && node.type = 'update')
+    UNION
+    (SELECT cte.field_event_date_value AS year_value FROM node LEFT JOIN content_type_event cte ON node.vid = cte.vid WHERE node.status <> 0 && node.type = 'event')
+    ) as years ORDER BY year_value DESC
+  ");
+  $output = '<ul id="mactimeline-calendar-year-list" name="yearfilter">';
+  while($date = db_fetch_object($result)){
+      $output .= '<li><a href="/calendar/'.$date->year_value.'">'.$date->year_value.'</a></li>';
+  }
+  $output .= '</ul>';
+  
+  return $output;
+}
+
+function mactimeline_calendar_year_selection_submit($form, &$form_state) {
+  $values = $form_state['values'];
+  drupal_goto('calendar/'.$values['year']);  
+}
+
+function mactimeline_calendar_load($year = NULL) {
+  //$output = drupal_get_form('mactimeline_calendar_year_selection');
+  $output = mactimeline_calendar_year_unordered_list();
+
+  if($year || is_numeric($year)) {
+    drupal_set_title('Calendar '.$year);
+    $output .= mactimeline_calendar_year($year);
+  } else {
+    drupal_set_title('Calendar');
+    $year = date('Y',time());
+    $output .= mactimeline_calendar_year($year);
+    //$output .= mactimeline_calendar_all_years();
+  }
+
+  return $output;
+}
+/*
+function mactimeline_calendar_all_years() {
+  $years = array();
+  $output = '';
+  $result = mysql_query("SELECT node.vid AS vid, node.nid AS nid, node.type AS type, node.title AS title, node_data_field_date.field_date_value AS field_date_value, content_type_update.field_related_product_nid AS field_related_product_nid FROM node LEFT JOIN content_field_date node_data_field_date ON node.vid = node_data_field_date.vid LEFT JOIN content_type_update ON node.vid = content_type_update.vid WHERE ((node.status <> 0) AND (node.type in ('update','event'))) ORDER BY field_date_value DESC");
+
+  while($date = db_fetch_object($result)){
+    $date->day = date('j',strtotime($date->field_date_value));
+    $date->month = date('n',strtotime($date->field_date_value));    
+    $date->year = date('Y',strtotime($date->field_date_value));
+	  $dates[] = $date;
+	  if (!in_array($date->year,$years)) {
+      $years[] = $date->year;
+  	}
+  }
+
+  foreach($years as $year){
+    $output .= mactimeline_calendar_table($year,$dates);
+  }
+
+  return $output;
+}
+*/
+
+function mactimeline_calendar_year($year) {
+  $result = mysql_query("
+  	SELECT items.*, ctu.field_related_product_nid FROM (
+    (SELECT node.vid AS vid, node.nid AS nid, node.type AS type, node.title AS title, ctu.field_date_value AS field_date_value FROM node LEFT JOIN content_type_update ctu ON node.vid = ctu.vid WHERE node.status <> 0 && node.type = 'update' && (((DATE_FORMAT(STR_TO_DATE(ctu.field_date_value, '%Y-%m-%dT%T'), '%Y') = '".$year."'))) ORDER BY field_date_value ASC)
+    UNION
+    (SELECT node.vid AS vid, node.nid AS nid, node.type AS type, node.title AS title, cte.field_event_date_value AS field_event_date_value FROM node LEFT JOIN content_type_event cte ON node.vid = cte.vid WHERE node.status <> 0 && node.type = 'event' && (((DATE_FORMAT(STR_TO_DATE(cte.field_event_date_value, '%Y-%m-%dT%T'), '%Y') = '".$year."'))) ORDER BY field_event_date_value ASC)
+    ) AS items
+    LEFT JOIN content_type_update ctu ON items.nid = ctu.nid
+  ");
+
+  while($date = db_fetch_object($result)){
+   $date->day = date('j',strtotime($date->field_date_value));
+   $date->month = date('n',strtotime($date->field_date_value));
+   $date->year = date('Y',strtotime($date->field_date_value));
+	 $dates[] = $date;	 
+  }
+
+  $output = mactimeline_calendar_table($year,$dates);
+
+  return $output;
+}
+
+function mactimeline_calendar_table($year,$dates) {
+   $calendar .= '
+   		<h2 class="calendar-year" id="mactimeline-year-current" style="display: none">'.$year.'</h2>
+    	<table cellpadding="0" cellspacing="0" id="calendar">
+      	<tr class="calendar-header">
+      		<td>S</td>
+      		<td>M</td>
+      		<td>T</td>
+      		<td>W</td>
+      		<td>T</td>
+      		<td>F</td>
+      		<td>S</td>
+      	</tr>
+      	<tr>
+    ';
+
+    $tr = 0;
+    $td = 0;
+
+    for($month = 1; $month <= 12; $month++) {
+      $end_day = date('t',mktime(1,0,0,$month,1,$year));
+      $one_day = date('w',mktime(1,0,0,$month,1,$year));
+
+      if ($one_day == '-1'){
+        $one_day = 6;
+      }
+
+      for ($i = 1; $i <= $end_day+$one_day; $i++) {
+        $day = $i - $one_day;
+
+        if ($day < 1 && $month == 1) {
+            $calendar .= '<td class="date-blank"></td>';
+        } elseif ($day > 0 && $day == 1) {
+          $formated_day = $day.' '.date('F',mktime(1,0,0,$month,1,$year));
+          $calendar .= mactimeline_calendar_cell($day,$month,$year,$dates,$formated_day);
+        } elseif ($day > 0) {
+          $calendar .= mactimeline_calendar_cell($day,$month,$year,$dates);
+        }
+
+        /*determining count and output last TD's*/
+        if($tr == 0) {
+          $td++;
+        }
+        if ($month == 12 && $i == $end_day+$one_day) {
+          if ($td == 0) $td = 1;
+          for($count = 0; $count < 7-$td; $count++) {
+            $calendar .= '<td class="date-blank"></td>';
+          }
+        }
+        /*determining count and output last TD's*/
+
+        /*tr*/
+        if($i % 7 == 0) {
+          if ($tr == 0) {
+           $tr = 1;
+           $td = 0;
+          } else {
+           $tr = 0;
+          }
+          if($tr == 1) {
+            //$calendar .= '</tr><tr class="odd">';
+            $calendar .= '</tr><tr>';
+          } else {
+            $calendar .= '</tr><tr>';
+          }
+        }
+        /*tr*/
+      }
+    }
+
+    $calendar .= '</tr></table>';
+    
+    $calendar .= '<div class="footer-nav">';
+	if ($year < 2012) $calendar .= '< <span class="next"><a href="/calendar/'.($year+1).'">Next</a></span> ';
+  	$calendar .= '|';
+  	if ($year > 1999) $calendar .= ' <span class="previous"><a href="/calendar/'.($year-1).'">Previous</a></span> >';
+	$calendar .= '</div>';
+
+    return $calendar;
+}
+
+function mactimeline_calendar_cell($day,$month,$year,$dates,$formated_day = NULL) {
+
+  $td_classes = array();
+
+  if($dates) {
+    foreach ($dates as $date) {
+      if ($month == $date->month && $day == $date->day && $year == $date->year) {
+        $items[] = $date;
+      }
+    }
+    if ($items) {
+      foreach ($items as $item) {
+        switch ($item->type) {
+          case 'event':
+            $terms = taxonomy_node_get_terms($item);
+            foreach($terms as $tid => $term) {
+              $term_name = $term->name;
+            }
+            $td_content .= l($term_name,'node/'.$item->nid,array('absolute' => TRUE, 'attributes' => array('class' => 'event')));
+            //$td_class = 'class="event-cell"';
+            $td_classes[] = 'event-cell';
+            break;
+          case 'update':
+              $node = node_load(array('nid' => $item->field_related_product_nid));
+              $files = filefield_get_node_files($node,'field_icon');
+              foreach($files as $fid => $file) {
+                $icon = theme('imagecache','icon_32x32',$file['filepath'],$item->title,$item->title);
+              }
+              $td_content .= l($icon,'node/'.$item->nid,array('absolute' => TRUE, 'html' => TRUE));
+            break;
+        }
+      }
+    }
+  }
+
+  //print '<pre>' . print_r($_SERVER, true) . '</pre>';
+
+  if ($_SERVER['REMOTE_ADDR'] == '118.208.214.34') {
+  }
+
+
+  $utime = strtotime(sprintf("%04d-%02d-%02d", $year, $month, $day));
+
+  $today_ts = date("Y-m-d");
+  $ts = date("Y-m-d", $utime);
+  //print $ts . ', ' . $today_ts . '<br />';
+
+  if ($ts === $today_ts) {
+    //$td_classes[] = 'date-today';
+  }
+
+  $wday = strtolower(date('D', $utime));
+  
+
+
+  $td_classes[] = 'date-week-day-' . $wday;
+  $td_classes[] = 'date-month-day-' . $day;
+  $td_classes[] = 'date-' . $ts;
+
+
+  $output = '<td class="' . implode(' ', $td_classes) . '"><div class="date">';
+  $output .=  $formated_day ? $formated_day : $day;
+  $output .= '</div><div>'.$td_content.'</div></td>';
+
+  return $output;
+}
+?>

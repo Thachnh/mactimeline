@@ -1,0 +1,8 @@
+/* $Id: node-rtl.css,v 1.3 2010/03/09 22:42:23 webmaster Exp $ */
+
+#node-admin-buttons {
+  float: right;
+  margin-left: 0;
+  margin-right: 0.5em;
+  clear: left;
+}

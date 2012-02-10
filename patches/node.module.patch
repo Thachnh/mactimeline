@@ -1,0 +1,25 @@
+Index: node.module
+===================================================================
+RCS file: /root/mactimeline.com/modules/node/node.module,v
+retrieving revision 1.5
+diff -u -r1.5 node.module
+--- node.module	9 Mar 2010 23:13:12 -0000	1.5
++++ node.module	9 Mar 2010 23:14:54 -0000
+@@ -1123,7 +1123,7 @@
+  * Implementation of hook_perm().
+  */
+ function node_perm() {
+-  $perms = array('administer content types', 'administer nodes', 'access content', 'view revisions', 'revert revisions', 'delete revisions');
++  $perms = array('administer content types', 'administer post settings', 'administer nodes', 'access content', 'view revisions', 'revert revisions', 'delete revisions');
+ 
+   foreach (node_get_types() as $type) {
+     if ($type->module == 'node') {
+@@ -1431,7 +1431,7 @@
+     'description' => 'Control posting behavior, such as teaser length, requiring previews before posting, and the number of posts on the front page.',
+     'page callback' => 'drupal_get_form',
+     'page arguments' => array('node_configure'),
+-    'access arguments' => array('administer nodes'),
++    'access arguments' => array('administer post settings'),
+     'file' => 'node.admin.inc',
+   );
+   $items['admin/content/node-settings/rebuild'] = array(

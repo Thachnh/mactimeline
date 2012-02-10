@@ -1,0 +1,43 @@
+<?php
+
+/**
+ * @file
+ * Test the basic functions of the user delete module.
+ */
+
+/**
+ * Inactive user module testcase.
+ */
+class UserDeleteTest extends DrupalWebTestCase {
+
+  /**
+   * User with administration privileges for inactive user module.
+   *
+   * @var stdlcass
+   */
+  protected $admin;
+
+  /**
+   * User account to test the module.
+   *
+   * @var stdlcass
+   */
+  protected $account;
+
+  public static function getInfo() {
+    return array(
+      'name' => t('User delete'),
+      'description' => t('Test user delete module.'),
+      'group' => t('User delete')
+    );
+  }
+
+  function setUp() {
+    parent::setUp('user_delete');
+    // Create a regular user with permissions to delete its own account.
+    $this->account = $this->drupalCreateUser(array('delete own account'));
+    // Create an admin user to configure user delete module.
+    $this->admin = $this->drupalCreateUser(array('administer users'));
+  }
+
+}

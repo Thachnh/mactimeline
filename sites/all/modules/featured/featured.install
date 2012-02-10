@@ -1,0 +1,136 @@
+<?php
+// $Id: user.install,v 1.5.2.2 2009/07/01 20:51:56 goba Exp $
+
+/**
+ * Implementation of hook_schema().
+ */
+function reservation_schema() {
+  $schema['reservation'] = array(
+    'description' => 'Maps users to roles.',
+    'fields' => array(
+      'rid' => array(
+        'type' => 'serial',
+        'not null' => TRUE,
+
+      ),
+     'name' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'Text mask used for filtering access.',
+      ),
+	  'company_name' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'Text mask used for filtering access.',
+      ), 'address' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+	   'email' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+	  'phone' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+	  'fax' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+	  'check_in_date' => array(
+        'type' => 'datetime',
+        'not null' => TRUE,
+      ),
+	  'check_out_date' => array(
+        'type' => 'datetime',
+        'not null' => TRUE,
+      ),
+	  'no_of_rooms' => array(
+        'type' => 'int',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => 0
+      ),
+	  'room_type' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+	  'no_of_persons' => array(
+        'type' => 'int',
+	   'not null' => TRUE,
+        'default' =>0,
+      ),
+		    'no_of_child' => array(
+        'type' => 'int',
+	   'not null' => TRUE,
+        'default' =>0,
+      ),
+		  	    'ages' => array(
+        'type' => 'varchar',
+		   'length' => 10,
+	 'not null' => TRUE,
+        'default' => '',
+      ),
+	  
+	  'no_of_days' => array(
+        'type' => 'int',
+		   'not null' => TRUE,
+        'default' =>0,
+      ),
+	  'comments' => array(
+        'type' => 'text',
+        'not null' => TRUE,
+        'default' => '',
+      ),
+		  
+	  'how_to_contact' => array(
+        'type' => 'text',
+        'not null' => TRUE,
+        'default' => '',
+      ),
+		'created' => array(
+        'type' => 'datetime',
+        'not null' => TRUE,
+
+      ),
+		'status' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+		  'default' => 0,
+
+      ),
+
+    ),
+    'primary key' => array('rid'),
+    
+  );
+
+  return $schema;
+}
+
+function reservation_install() {
+  drupal_install_schema('reservation');
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function reservation_uninstall() {
+  drupal_uninstall_schema('reservation');
+}
+

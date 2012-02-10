@@ -1,0 +1,18 @@
+/* $Id: system-menus-rtl.css,v 1.3 2010/03/09 22:42:23 webmaster Exp $ */
+
+ul.menu {
+  text-align:right;
+}
+ul.menu li {
+  margin: 0 0.5em 0 0;
+}
+li.expanded {
+  padding: 0.2em 0 0 0.5em;
+}
+li.collapsed {
+  list-style-image: url(../../misc/menu-collapsed-rtl.png);
+  padding: 0.2em 0 0 0.5em;
+}
+li.leaf {
+  padding: 0.2em 0 0 0.5em;
+}

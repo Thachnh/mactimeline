@@ -1,0 +1,135 @@
+<?php
+function phptext_theme() {
+  return array(
+    'phptext_textarea' => array(
+      'arguments' => array('element' => NULL),
+    ),
+    'phptext_formatter_default' => array(
+      'arguments' => array('element' => NULL),
+    ),
+  );
+}
+
+function phptext_field_info() {
+  return array(
+    'phptext' => array(
+      'label' => t('Dynamic Field'),
+      'description' => t('Computes user generated php and lets you to access Drupal objects'),
+      'callbacks' => array(
+        'tables' => CONTENT_CALLBACK_DEFAULT,
+        'arguments' => CONTENT_CALLBACK_DEFAULT,
+        ),
+      ),
+    );
+}
+
+
+function phptext_field_settings($op, $field) {
+  switch ($op) {
+    case 'form':
+		return array();
+		
+    case 'save':
+      return array();
+
+    case 'database columns':
+		$columns['value'] = array('type' => 'text', 'size' => 'big', 'not null' => FALSE, 'sortable' => TRUE);
+		return $columns;
+  }
+}
+
+
+function phptext_field($op, &$node, $field, &$items, $teaser, $page) {
+  switch ($op) {
+    case 'sanitize':
+      foreach ($items as $delta => $item) {
+        $text=eval($field['widget']['code']);
+        $items[$delta]['safe'] = $text;
+      }
+  }
+}
+
+
+function phptext_content_is_empty($item, $field) {
+  return (empty($item['value']) && $item['value'] == '') ? TRUE : FALSE;
+}
+
+
+function phptext_field_formatter_info() {
+  return array(
+		'default' => array(
+      'label' => t('Default'),
+      'field types' => array('phptext'),
+      'multiple values' => CONTENT_HANDLE_CORE,
+    ),
+  );
+}
+
+function theme_phptext_formatter_default($element) {
+  return $element['#item']['safe'];
+}
+
+
+
+
+function phptext_widget_info() {
+  return array(
+    'phptext_textarea' => array(
+      'label' => t('Text area (multiple rows)'),
+      'field types' => array('phptext'),
+      'multiple values' => CONTENT_HANDLE_CORE,
+      'callbacks' => array(
+        'default value' => CONTENT_CALLBACK_DEFAULT,
+      ),
+    ),
+  );
+}
+
+
+function phptext_elements() {
+  return array(
+    'phptext_textarea' => array(
+      '#input' => TRUE,
+      '#columns' => array('value', 'format'), '#delta' => 0,
+      '#process' => array('phptext_textarea_process'),
+      '#filter_value' => FILTER_FORMAT_DEFAULT,
+      ),
+  );
+}
+
+
+function phptext_widget_settings($op, $widget) {
+ switch ($op) {
+    case 'form':
+      $form = array();
+        $form['code'] = array(
+          '#type' => 'textarea',
+          '#title' => t('PHP code'),
+          '#default_value' => isset($widget['code']) ? $widget['code'] : '' ,
+          '#required' => TRUE,
+        );
+      return $form;
+
+    case 'save':
+      return array('code');
+  }
+}
+
+
+function phptext_widget(&$form, &$form_state, $field, $items, $delta = 0) {
+  $element = array(
+    '#type' => $field['widget']['type'],
+    '#default_value' => isset($items[$delta]) ? $items[$delta] : '',
+  );
+  return $element;
+}
+
+
+function phptext_textarea_process($element, $edit, $form_state, $form) {
+  return $element;
+}
+
+
+function theme_phptext_textarea($element) {
+  return $element['#children'];
+}

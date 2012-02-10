@@ -1,0 +1,39 @@
+<?php
+function mactimeline_form_alter($form, $form_state, $form_id) {
+
+  global $user;
+
+  if ($user->name == 'Admin') {
+    if ($form_id == 'product_node_form') {
+      //drupal_set_message('<pre>' . print_r($form, true) . '</pre>');
+    }
+  }
+
+  switch ($form_id) {
+    case 'comment_form':
+      unset($form['comment_filter']['format']);
+      unset($form['preview']);
+      unset($form['homepage']);
+      unset($form['mail']['#description']);
+      $form['name']['#title'] = t('Name');
+      $form['submit']['#value'] = t('Submit Reply');
+  	break;
+    case 'user_login':
+      drupal_set_title('Login');
+      unset($form['name']['#description']);
+      unset($form['pass']['#description']);      
+      break;
+  }
+}
+
+function mactimeline_preprocess_page(&$vars) {
+    switch (arg(0)) {
+      case 'events':
+        $vars['head_title'] = 'Events | Mactimeline';
+        break;
+      case 'list':
+        $vars['head_title'] = 'List | Mactimeline';
+        break;
+    }    
+  }
+?>

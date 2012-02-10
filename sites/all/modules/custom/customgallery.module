@@ -1,0 +1,166 @@
+
+<?php
+
+$send_form_to = 'shashi.bushan87@gmail.com';
+
+function custom_gallery_menu() {
+  $items = array();
+  $items['gallery'] = array(
+    'title' => t('Gallery'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('my_form'),
+    'description' => t('Display your name.'),
+    'access callback' => true,
+    'type' => MENU_LOCAL_TASK,
+  );
+
+  return $items;
+}
+
+function my_form() {
+$form['mydropdown'] = array(
+    '#type' => 'select',
+    '#options' => array('0' =>'Apprentice','1'=>'bike','3'=>'car','4'=>'private'),
+    '#title' => t('job applied for'),
+    );
+  $form['Name'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Name'),
+    '#size' => '20',
+    '#required' => TRUE,
+  );
+  $form['Address'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Address'),
+    '#size' => '20',
+    '#required' => TRUE,
+  );
+  $form['Phone'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Phone'),
+    '#size' => '20',
+    '#required' => TRUE,
+  );
+ $form['city'] = array(
+    '#type' => 'textfield',
+    '#title' => t('city'),
+    '#size' => '20',
+    '#required' => TRUE,
+  );
+
+  $form['mail'] = array(
+    '#type' => 'textfield',
+    '#title' => t('E-mail'),
+    '#size' => '20',
+    '#required' => TRUE,
+  );
+  $form['sex'] = array(
+  '#type' => 'radios',
+  '#options' => array( 0 => 'Male', 1 => 'Female'),
+  '#title' => t('sex'),
+); 
+   
+  $form['Remarks'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Remarks'),
+    '#size' => '20',
+  );
+   
+  $form['resume'] = array(
+    '#type' => 'file',
+    '#title' => t('Upload resume'),
+    '#size' => '20',
+  );
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => 'Submit',
+  );
+ return $form;
+}
+
+ 
+				
+/**
+* Validate the form.
+*/
+function my_form_validate($form, &$form_state) {
+  $valid_email = $form_state['values']['mail'];
+  if (!valid_email_address($valid_email)) {
+  form_set_error('email', 'Your email address -- ' . $valid_email . ' -- appears malformed');
+  }
+if (name==''){
+form_set_error('name','Your email address -- ' . $valid_email . ' -- appears malformed');
+}
+}
+
+/**
+* Create the hook_mail function
+*/
+function my_form_mail($key, &$message, $params) {
+
+  $headers = array(
+    'MIME-Version' => '1.0',
+    'Content-Type' => 'text/html; charset=UTF-8; format=flowed',
+    'Content-Transfer-Encoding' => '8Bit',
+    'X-Mailer' => 'Drupal'
+  );
+
+  foreach ($headers as $key => $value) {
+    $message['headers'][$key] = $value;
+  }
+
+  $message['subject'] = $params['subject'];
+  $message['body'] = $params['body'];
+}
+
+/**
+* Create the form submit function
+*/
+function my_form_submit($form, &$form_state)
+ {
+
+    $valid_email = $form_state['values']['mail'];
+    $from = 'S.bhushan16787@yahoo.in';
+    $body = 'New Email Sent = ' . $valid_email;
+ 
+    $params = array(
+    'body' => $body,
+    'subject' => 'This is a subject',
+    );
+  
+
+   if (drupal_mail('my_form', 'some_mail_key', $valid_email, language_default(), $params, $from, TRUE))
+    {
+        drupal_set_message('An email has been sent to ' . $valid_email);     
+    } else {
+        drupal_set_message('There was an error sending your email');
+    }
+
+
+
+//return drupal_get_form('my_form');
+ {
+
+  // To make your code easier to read, save the data from $form_state into your own variables.
+  $Name     = $form_state['values']['Name'];  // I assume the name of the field is 'name'.
+  $Address = $form_state['values']['Address']; // I assume the name of the field is 'position'.
+  $Phone  = $form_state['values']['Phone']; // etc.
+  $mail = $form_state['values']['mail'];
+  $Remarks = $form_state['values']['Remarks'];
+   $sex     = $form_state['values']['sex'];
+  
+// insert into database
+ db_query("INSERT INTO {custom} (Name, Address, Phone, mail, Remarks, sex) VALUES ( '$Name', '$Address', '$Phone', '$mail','$Remarks','$sex')");
+
+  // Save the data to the database, using $success to check for errors. (See below.)
+  if ($success = db_query($Name,$Address,$Phone,$mail,$Remarks,$sex)) {
+    // Tell the user that the employee has been saved.
+    drupal_set_message($name . t(' has been saved.'));
+  }
+  else { // If there's an error, $success will evaluate to FALSE, and the following code will execute.
+    drupal_set_message(t('There was an error saving your data. Please try again.'));
+  }
+
+}
+}
+?>
