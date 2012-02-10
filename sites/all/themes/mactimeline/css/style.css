@@ -482,6 +482,14 @@ color: #736F6E; /*make sure color is grey (IE was not getting grey)*/
 	color: #757575;
 }
 
+.tags .link-button:hover {
+	color: white;
+	background-color: #616D7E;
+}
+.tags .link-button a:hover {
+	color: white;
+}
+
 .view-content .list-right .event-type a {
 	color: #161616;
 	background-color: #d4d4d4;
@@ -490,17 +498,33 @@ color: #736F6E; /*make sure color is grey (IE was not getting grey)*/
 	font-weight: normal;
 }
 
+.view-content .list-right .event-type a:hover {
+	color: white;
+	background-color: #616D7E;
+}
+
 .view-content .list-right .comment-tag a {
 	color: #757575;
 	background-color: #d8d8d8;
 	border: 1px solid #ccc;
 	padding: 0 2px;
 }
+
+.view-content .list-right .comment-tag a:hover {
+	color: white;
+	background-color: #616D7E;
+}
+
 .view-content .list-right .comment-tag.more a {
 	color: white;
 	background-color: #646464;
 	border: 1px solid #323232;
 	padding: 0 2px;
+}
+
+.view-content .list-right .comment-tag.more a:hover {
+	color: white;
+	background-color: #616D7E;
 }
 
 /* YEAR SELECTION ORDERED LIST */
