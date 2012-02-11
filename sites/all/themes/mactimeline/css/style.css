@@ -100,7 +100,7 @@ UL.links LI{display:inline}
 		.product .related-group A{font-size:20px; clear:both; color:#999}	
 		.product .header .links {width: 200px;padding-top: 15px;}	
 		.product .header .links a{float: right; margin: 4px 0;}
-	.product H1{margin:8px 0 0 5px; font-size:48px; font-family: myriad_pro;}	
+	.product H1{margin:8px 0 0 5px; font-size:48px; font-family: myriad_pro; padding-left: 20px}	
 	.product .apple-links{clear:left; margin-bottom:10px;}
 	 .product .apple-links A{color:black; text-transform:uppercase;}
 	 .product .product-dates span {padding-right: 20px;}
@@ -626,6 +626,11 @@ color: #736F6E; /*make sure color is grey (IE was not getting grey)*/
 /* IDEA PAGE*/
 .idea .description {font-size: 14px; padding: 10px 0;}
 .idea .information {color: #454545;}
+.idea .header {margin-bottom: 10px; border-collapse: collapse; border-spacing: 2px;}
+.idea .icon {width:85px; height:85px; padding:0; text-align:center; vertical-align:middle;}
+.idea table.header td {vertical-align: middle;}
+.idea .related-group {width: 100%;}
+.idea H1 {margin:8px 0 0 5px; font-size:48px; font-family: myriad_pro; padding-left: 20px}
 .submitidea {color: #454545;}
 
 /* BIG COUNT DOWN IN EVENT PAGE*/
